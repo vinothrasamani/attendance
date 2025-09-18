@@ -1,7 +1,6 @@
 import 'package:attendance/install_id_manager.dart';
 import 'package:attendance/main.dart';
 import 'package:attendance/view_model/auth_service.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -47,7 +46,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     return TextFormField(
       style: TextStyle(color: Colors.white),
       keyboardType: type,
-      cursorColor: baseColor,
+      cursorColor: Colors.white,
       obscureText: obscure ? obs : false,
       decoration: InputDecoration(
         hintText: hint,
@@ -82,6 +81,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       onChanged: onChanged,
     );
   }
+
+  final style = ElevatedButton.styleFrom(
+    padding: EdgeInsets.all(15),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(10),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +132,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         SizedBox(height: 20),
                         field(
                           hint: 'Name',
-                          onChanged: (p0) {},
+                          onChanged: (p0) {
+                            name = p0;
+                          },
                         ),
                         SizedBox(height: 10),
                         if (!isLogin)
@@ -137,10 +145,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                                 hint: 'Phone',
                                 icon: Icons.phone,
                                 type: TextInputType.phone,
+                                onChanged: (p0) {
+                                  phone = p0;
+                                },
                               ),
                               SizedBox(height: 10),
                               field(
                                   hint: 'Staff Code',
+                                  onChanged: (p0) {
+                                    code = p0;
+                                  },
                                   icon: Icons.person_pin_rounded),
                               SizedBox(height: 10),
                             ],
@@ -148,6 +162,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         field(
                           hint: 'Password',
                           obscure: true,
+                          onChanged: (p0) {
+                            password = p0;
+                          },
                           icon: Icons.lock,
                         ),
                         SizedBox(height: 10),
@@ -155,12 +172,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           width: double.infinity,
                           child: ElevatedButton.icon(
                             onPressed: () => submit(isLogin),
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.all(15),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
+                            style: style,
                             icon: isLoading
                                 ? SizedBox(
                                     height: 15,
@@ -177,25 +189,54 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           ),
                         ),
                         SizedBox(height: 20),
-                        Text.rich(
-                          TextSpan(
-                            text: isLogin
-                                ? 'I\'m a new staff '
-                                : 'I\'m an old staff ',
-                            style: TextStyle(color: Colors.white, fontSize: 12),
-                            children: [
-                              TextSpan(
-                                text: isLogin ? "Register" : "Login",
-                                style: TextStyle(color: baseColor),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    ref
-                                        .read(AuthService.isLogin.notifier)
-                                        .state = !isLogin;
-                                  },
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  ref.read(AuthService.isLogin.notifier).state =
+                                      false;
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white
+                                      .withAlpha(isLogin ? 40 : 100),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                    side: BorderSide(
+                                      color: isLogin
+                                          ? Colors.transparent
+                                          : Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                child: Text('Register'),
                               ),
-                            ],
-                          ),
+                            ),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  ref.read(AuthService.isLogin.notifier).state =
+                                      true;
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                    side: BorderSide(
+                                      color: !isLogin
+                                          ? Colors.transparent
+                                          : Colors.white,
+                                    ),
+                                  ),
+                                  backgroundColor: Colors.white
+                                      .withAlpha(isLogin ? 100 : 40),
+                                  foregroundColor: Colors.white,
+                                ),
+                                child: Text('Login'),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

@@ -1,12 +1,16 @@
 import 'package:attendance/install_id_manager.dart';
 import 'package:attendance/view/splash_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await InstallIdManager.getInstallId();
+  SystemChrome.setPreferredOrientations(
+    [DeviceOrientation.portraitDown, DeviceOrientation.portraitUp],
+  );
   runApp(ProviderScope(child: const MyApp()));
 }
 
