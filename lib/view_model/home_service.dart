@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:attendance/base_file.dart';
-import 'package:attendance/view_model/attendance_model.dart';
+import 'package:attendance/model/attendance_model.dart';
 import 'package:attendance/view_model/user_sevice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,10 +49,14 @@ class HomeService {
     }
     final start = item.checkIn!;
     final end = item.checkOut!;
-    final duration = end.difference(start).inMinutes;
-    if (duration >= 240) {
+    final durationInMinutes = end.difference(start).inMinutes;
+    final durationInHours = durationInMinutes / 60;
+
+    print("Worked: ${durationInHours.toStringAsFixed(2)} hours");
+
+    if (durationInHours >= 8) {
       return "Present";
-    } else if (duration >= 75 && duration < 240) {
+    } else if (durationInHours >= 4) {
       return "Half Day";
     } else {
       return "Absent";
@@ -61,7 +65,8 @@ class HomeService {
 
   static Future<bool> addStatus(WidgetRef ref) async {
     final user = ref.read(userProvider);
-    final res = await BaseFile.postMethod('check-status', {'userId': user?.id});
+    final res = await BaseFile.postMethod('check-status',
+        {'userId': user?.id, 'day': DateTime.now().toIso8601String()});
     final data = jsonDecode(res);
     if (data['success']) {
       Get.snackbar(

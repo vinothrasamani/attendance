@@ -1,4 +1,4 @@
-import 'package:attendance/view_model/attendance_model.dart';
+import 'package:attendance/model/attendance_model.dart';
 import 'package:attendance/view_model/home_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,6 +31,7 @@ class _AttendanceState extends ConsumerState<Attendance> {
     final attData = ref.watch(HomeService.attendanceData);
     final list = ref.watch(HomeService.list);
     final isLoading = ref.watch(HomeService.isLoading);
+    print(attData);
 
     Color getColor(String status) {
       switch (status) {
@@ -119,71 +120,74 @@ class _AttendanceState extends ConsumerState<Attendance> {
                   ],
                 ),
               ),
-              buildLegend(),
-              TableCalendar(
-                firstDay: DateTime.utc(now.year - 1, 1, 1),
-                lastDay: DateTime.utc(now.year + 1, 12, 31),
-                focusedDay: fDay,
-                availableCalendarFormats: {CalendarFormat.month: 'Month'},
-                weekendDays: [DateTime.sunday],
-                selectedDayPredicate: (day) => isSameDay(sDay, day),
-                onDaySelected: (selectedDay, focusedDay) {
-                  ref.read(HomeService.selectedDay.notifier).state =
-                      selectedDay;
-                  ref.read(HomeService.focusedDay.notifier).state = focusedDay;
-                },
-                onPageChanged: (focusedDay) {
-                  HomeService.fetchAttendance(ref, focusedDay);
-                  ref.read(HomeService.focusedDay.notifier).state = focusedDay;
-                },
-                calendarBuilders: CalendarBuilders(
-                  defaultBuilder: (context, day, focusedDay) {
-                    final dayKey = DateTime.utc(day.year, day.month, day.day);
-                    final status = attData[dayKey];
-                    if (status == null && day.isAfter(DateTime.now())) {
-                      return null;
-                    }
-                    final color = getColor(status ?? 'Absent');
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: color.withAlpha(80),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: color, width: 1),
-                      ),
-                      margin: const EdgeInsets.all(2),
-                      alignment: Alignment.center,
-                      child: Text(
-                        "${day.day}",
-                        style: TextStyle(
-                          color: color,
-                          fontWeight: FontWeight.bold,
+              Card(
+                child: TableCalendar(
+                  firstDay: DateTime.utc(now.year - 1, 1, 1),
+                  lastDay: DateTime.utc(now.year + 1, 12, 31),
+                  focusedDay: fDay,
+                  availableCalendarFormats: {CalendarFormat.month: 'Month'},
+                  weekendDays: [DateTime.sunday],
+                  selectedDayPredicate: (day) => isSameDay(sDay, day),
+                  onDaySelected: (selectedDay, focusedDay) {
+                    ref.read(HomeService.selectedDay.notifier).state =
+                        selectedDay;
+                    ref.read(HomeService.focusedDay.notifier).state =
+                        focusedDay;
+                  },
+                  onPageChanged: (focusedDay) {
+                    HomeService.fetchAttendance(ref, focusedDay);
+                    ref.read(HomeService.focusedDay.notifier).state =
+                        focusedDay;
+                  },
+                  calendarBuilders: CalendarBuilders(
+                    defaultBuilder: (context, day, focusedDay) {
+                      final dayKey = DateTime.utc(day.year, day.month, day.day);
+                      final status = attData[dayKey];
+                      if (status == null && day.isAfter(DateTime.now())) {
+                        return null;
+                      }
+                      final color = getColor(status ?? 'Absent');
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: color.withAlpha(80),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: color, width: 1),
                         ),
-                      ),
-                    );
-                  },
-                  selectedBuilder: (context, day, focusedDay) {
-                    final dayKey = DateTime.utc(day.year, day.month, day.day);
-                    final status = attData[dayKey];
-                    if (status == null && day.isAfter(DateTime.now())) {
-                      return null;
-                    }
-                    final color = getColor(status ?? 'Absent');
+                        margin: const EdgeInsets.all(2),
+                        alignment: Alignment.center,
+                        child: Text(
+                          "${day.day}",
+                          style: TextStyle(
+                            color: color,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      );
+                    },
+                    selectedBuilder: (context, day, focusedDay) {
+                      final dayKey = DateTime.utc(day.year, day.month, day.day);
+                      final status = attData[dayKey];
+                      if (status == null && day.isAfter(DateTime.now())) {
+                        return null;
+                      }
+                      final color = getColor(status ?? 'Absent');
 
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: color.withAlpha(80),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.black, width: 2),
-                      ),
-                      margin: const EdgeInsets.all(2),
-                      alignment: Alignment.center,
-                      child: Text(
-                        "${day.day}",
-                        style: TextStyle(
-                            color: Colors.black, fontWeight: FontWeight.bold),
-                      ),
-                    );
-                  },
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: color.withAlpha(80),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.black, width: 2),
+                        ),
+                        margin: const EdgeInsets.all(2),
+                        alignment: Alignment.center,
+                        child: Text(
+                          "${day.day}",
+                          style: TextStyle(
+                              color: Colors.black, fontWeight: FontWeight.bold),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
               SizedBox(height: 20),
@@ -226,7 +230,7 @@ class _AttendanceState extends ConsumerState<Attendance> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  "Status on ${sDay.day}/${sDay.month}/${sDay.year}: ",
+                                  "Status on ${sDay.day}/${sDay.month}/${sDay.year} ",
                                   style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold),
@@ -257,6 +261,7 @@ class _AttendanceState extends ConsumerState<Attendance> {
                   },
                 ),
               ),
+              buildLegend(),
               SizedBox(height: 15),
             ],
           ),
