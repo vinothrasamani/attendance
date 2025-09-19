@@ -17,7 +17,9 @@ class AuthService {
     final SharedPreferences preferences = await SharedPreferences.getInstance();
     final isl = ref.read(isLogin);
     final res = await BaseFile.postMethod(isl ? 'login' : 'register', object);
+    print(res);
     final data = userModelFromJson(res);
+    print(res);
     if (data.success) {
       if (!isl) {
         ref.read(isLogin.notifier).state = true;

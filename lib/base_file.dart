@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class BaseFile {
-  static String baseUrl = 'http://192.168.1.9:8000/api';
+  static String baseUrl = 'http://192.168.1.6:8000/api';
 
   static Future<dynamic> postMethod(String endpoint, Object object) async {
     try {
@@ -12,6 +12,30 @@ class BaseFile {
       print(object);
       print(url);
       final res = await http.post(url, body: jsonEncode(object), headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      });
+      print('Response is => ${res.body}');
+      if (res.statusCode == 200) {
+        return res.body;
+      } else {
+        return jsonEncode({
+          'success': false,
+          'message':
+              'Something went wrong with the status code ${res.statusCode}'
+        });
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+      return jsonEncode({'success': false, 'message': 'Something went wrong!'});
+    }
+  }
+
+  static Future<dynamic> getMethod(String endpoint) async {
+    try {
+      final url = Uri.parse('$baseUrl/$endpoint');
+      print(url);
+      final res = await http.get(url, headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       });
@@ -27,6 +51,7 @@ class BaseFile {
       }
     } catch (e) {
       debugPrint(e.toString());
+      return jsonEncode({'success': false, 'message': 'Something went wrong!'});
     }
   }
 }

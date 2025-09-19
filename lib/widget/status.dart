@@ -1,12 +1,14 @@
 import 'package:attendance/main.dart';
+import 'package:attendance/view_model/home_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 
-class Status extends StatelessWidget {
+class Status extends ConsumerWidget {
   const Status({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final Size size = MediaQuery.of(context).size;
     return SingleChildScrollView(
       child: Container(
@@ -15,6 +17,11 @@ class Status extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Container(
+                constraints: BoxConstraints(maxHeight: 300, maxWidth: 300),
+                child: Image.asset('assets/vector.png'),
+              ),
+              SizedBox(height: 20),
               Container(
                 padding: EdgeInsets.all(10),
                 margin: EdgeInsets.symmetric(horizontal: 20),
@@ -37,6 +44,9 @@ class Status extends StatelessWidget {
                 child: SlideAction(
                   innerColor: Colors.green,
                   outerColor: baseColor,
+                  textStyle: TextStyle(fontSize: 20, color: Colors.white),
+                  text: 'Slide to Mark',
+                  onSubmit: () => HomeService.addStatus(ref),
                 ),
               ),
             ],

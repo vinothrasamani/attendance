@@ -1,6 +1,86 @@
+import 'dart:convert';
+
+import 'package:attendance/base_file.dart';
+import 'package:attendance/view_model/attendance_model.dart';
+import 'package:attendance/view_model/user_sevice.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 
 class HomeService {
   static final isLoading = StateProvider<bool>((ref) => false);
-  static final index = StateProvider((ref) => 0);
+  static final index = StateProvider<int>((ref) => 0);
+  static final focusedDay = StateProvider<DateTime>((ref) => DateTime.now());
+  static final selectedDay = StateProvider<DateTime?>((ref) => null);
+  static final attendanceData =
+      StateProvider<Map<DateTime, String>>((ref) => {});
+  static final list = StateProvider<List<AttendanceData>>((ref) => []);
+
+  static Future<void> fetchAttendance(WidgetRef ref, DateTime day) async {
+    ref.read(isLoading.notifier).state = true;
+    final user = ref.read(userProvider);
+    try {
+      final res =
+          await BaseFile.getMethod('fetch-attendance?id=${user?.id}&&day=$day');
+      final data = attendanceModelFromJson(res);
+      if (data.success) {
+        ref.read(list.notifier).state = data.data;
+        final Map<DateTime, String> newAttendanceData = {};
+        for (var item in data.data) {
+          final status = _calculateAttendanceStatus(item);
+          newAttendanceData[DateTime.utc(item.createdAt.year,
+              item.createdAt.month, item.createdAt.day)] = status;
+        }
+        final a = ref.read(attendanceData.notifier).state;
+        a.clear();
+        a.addAll(newAttendanceData);
+        ref.read(isLoading.notifier).state = false;
+      } else {
+        ref.read(isLoading.notifier).state = false;
+      }
+    } catch (e) {
+      ref.read(isLoading.notifier).state = false;
+    }
+  }
+
+  static String _calculateAttendanceStatus(AttendanceData item) {
+    if (item.checkIn == null || item.checkOut == null) {
+      return "Absent";
+    }
+    final start = item.checkIn!;
+    final end = item.checkOut!;
+    final duration = end.difference(start).inMinutes;
+    if (duration >= 240) {
+      return "Present";
+    } else if (duration >= 75 && duration < 240) {
+      return "Half Day";
+    } else {
+      return "Absent";
+    }
+  }
+
+  static Future<bool> addStatus(WidgetRef ref) async {
+    final user = ref.read(userProvider);
+    final res = await BaseFile.postMethod('check-status', {'userId': user?.id});
+    final data = jsonDecode(res);
+    if (data['success']) {
+      Get.snackbar(
+        'Success',
+        data['message'],
+        borderRadius: 5,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+      return true;
+    } else {
+      Get.snackbar(
+        'Failed',
+        data['message'],
+        borderRadius: 5,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+  }
 }

@@ -171,7 +171,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton.icon(
-                            onPressed: () => submit(isLogin),
+                            onPressed: () => isLoading ? null : submit(isLogin),
                             style: style,
                             icon: isLoading
                                 ? SizedBox(
