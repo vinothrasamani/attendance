@@ -13,24 +13,17 @@ class AuthScreen extends ConsumerStatefulWidget {
 
 class _AuthScreenState extends ConsumerState<AuthScreen> {
   final _key = GlobalKey<FormState>();
-  String? name, code, phone, password, token;
+  String? code, phone, token;
 
   @override
   void initState() {
     super.initState();
   }
 
-  void submit(bool isLogin) async {
+  void submit() async {
     if (_key.currentState!.validate()) {
-      ref.read(AuthService.isLoading.notifier).state = true;
       token = await InstallIdManager.getInstallId();
-      final body = {
-        'name': name,
-        if (!isLogin) 'phone': phone,
-        if (!isLogin) 'code': code,
-        'token': token,
-        'password': password,
-      };
+      final body = {'phone': phone, 'code': code, 'token': token};
       AuthService.submit(ref, body);
     }
   }
@@ -39,15 +32,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     String? hint,
     TextInputType? type,
     IconData icon = Icons.person,
-    bool obscure = false,
     Function(String)? onChanged,
   }) {
-    final obs = ref.watch(AuthService.obscure);
     return TextFormField(
       style: TextStyle(color: Colors.white),
       keyboardType: type,
       cursorColor: Colors.white,
-      obscureText: obscure ? obs : false,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(color: Colors.white54),
@@ -63,17 +53,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         ),
         prefixIcon: Icon(icon, color: Colors.white),
         filled: true,
-        suffixIcon: obscure
-            ? IconButton(
-                onPressed: () {
-                  ref.read(AuthService.obscure.notifier).state = !obs;
-                },
-                icon: Icon(
-                  obs ? Icons.visibility : Icons.visibility_off,
-                  color: Colors.white,
-                ),
-              )
-            : null,
         fillColor: Colors.white24,
       ),
       validator: (value) =>
@@ -91,9 +70,23 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isLogin = ref.watch(AuthService.isLogin);
     final isLoading = ref.watch(AuthService.isLoading);
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Login to Continue'),
+        centerTitle: true,
+        backgroundColor: baseColor,
+        foregroundColor: Colors.white,
+      ),
+      bottomNavigationBar: Container(
+        padding: EdgeInsets.all(15),
+        color: baseColor,
+        child: Text(
+          '© Attendance, All rights reserved.',
+          style: TextStyle(color: Colors.white, fontSize: 12),
+          textAlign: TextAlign.center,
+        ),
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -122,7 +115,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       children: [
                         SizedBox(height: 30),
                         Text(
-                          isLogin ? 'Welcome Back!' : 'Register Details!',
+                          'Welcome Back!',
                           style: TextStyle(
                             fontSize: 20,
                             color: Colors.white,
@@ -131,47 +124,26 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         ),
                         SizedBox(height: 20),
                         field(
-                          hint: 'Name',
+                          hint: 'Phone',
+                          icon: Icons.phone,
+                          type: TextInputType.phone,
                           onChanged: (p0) {
-                            name = p0;
+                            phone = p0;
                           },
                         ),
                         SizedBox(height: 10),
-                        if (!isLogin)
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              field(
-                                hint: 'Phone',
-                                icon: Icons.phone,
-                                type: TextInputType.phone,
-                                onChanged: (p0) {
-                                  phone = p0;
-                                },
-                              ),
-                              SizedBox(height: 10),
-                              field(
-                                  hint: 'Staff Code',
-                                  onChanged: (p0) {
-                                    code = p0;
-                                  },
-                                  icon: Icons.person_pin_rounded),
-                              SizedBox(height: 10),
-                            ],
-                          ),
                         field(
-                          hint: 'Password',
-                          obscure: true,
-                          onChanged: (p0) {
-                            password = p0;
-                          },
-                          icon: Icons.lock,
-                        ),
+                            hint: 'Staff Code',
+                            onChanged: (p0) {
+                              code = p0;
+                            },
+                            icon: Icons.person_pin_rounded),
+                        SizedBox(height: 10),
                         SizedBox(height: 10),
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton.icon(
-                            onPressed: () => isLoading ? null : submit(isLogin),
+                            onPressed: () => isLoading ? null : submit(),
                             style: style,
                             icon: isLoading
                                 ? SizedBox(
@@ -181,63 +153,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                                         strokeWidth: 2),
                                   )
                                 : null,
-                            label: Text(isLoading
-                                ? 'Loading...'
-                                : isLogin
-                                    ? 'Login'
-                                    : 'Sign Up'),
+                            label: Text(isLoading ? 'Logging In...' : 'Login'),
                           ),
                         ),
-                        SizedBox(height: 20),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  ref.read(AuthService.isLogin.notifier).state =
-                                      false;
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white
-                                      .withAlpha(isLogin ? 40 : 100),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    side: BorderSide(
-                                      color: isLogin
-                                          ? Colors.transparent
-                                          : Colors.white,
-                                    ),
-                                  ),
-                                ),
-                                child: Text('Register'),
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  ref.read(AuthService.isLogin.notifier).state =
-                                      true;
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    side: BorderSide(
-                                      color: !isLogin
-                                          ? Colors.transparent
-                                          : Colors.white,
-                                    ),
-                                  ),
-                                  backgroundColor: Colors.white
-                                      .withAlpha(isLogin ? 100 : 40),
-                                  foregroundColor: Colors.white,
-                                ),
-                                child: Text('Login'),
-                              ),
-                            ),
-                          ],
-                        ),
+                        SizedBox(height: 10),
                       ],
                     ),
                   ),

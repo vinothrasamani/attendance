@@ -12,8 +12,6 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  static final isLogin = StateProvider.autoDispose<bool>((ref) => true);
-  static final obscure = StateProvider.autoDispose<bool>((ref) => true);
   static final isLoading = StateProvider.autoDispose<bool>((ref) => false);
 
   static Future<bool> isBiomatricSupported() async {
@@ -61,36 +59,20 @@ class AuthService {
     }
   }
 
-  static Future<bool> cancelAuth() async {
-    return await LocalAuthPlatform.instance.stopAuthentication();
-  }
-
   static void submit(WidgetRef ref, Object object) async {
     final SharedPreferences preferences = await SharedPreferences.getInstance();
-    final isl = ref.read(isLogin);
-    final res = await BaseFile.postMethod(isl ? 'login' : 'register', object);
+    final res = await BaseFile.postMethod('login', object);
     final data = userModelFromJson(res);
     if (data.success) {
-      if (!isl) {
-        ref.read(isLogin.notifier).state = true;
-        Get.snackbar(
-          'Registered',
-          'New user registered successfully!',
-          borderRadius: 5,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
-      } else {
-        preferences.setString('user', jsonEncode(data.data));
-        Get.offAll(() => HomeScreen());
-        Get.snackbar(
-          'Logged In',
-          'User logged in successfully!',
-          borderRadius: 5,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
-      }
+      preferences.setString('user', jsonEncode(data.data));
+      Get.offAll(() => HomeScreen());
+      Get.snackbar(
+        'Logged In',
+        'User logged in successfully!',
+        borderRadius: 5,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
     } else {
       Get.snackbar(
         'Failed',

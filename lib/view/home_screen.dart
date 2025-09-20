@@ -6,6 +6,8 @@ import 'package:attendance/widget/attendance.dart';
 import 'package:attendance/widget/status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -50,7 +52,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Column(
             children: [
               Container(
-                padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                padding: EdgeInsets.all(5),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
                   color: baseColor,
@@ -59,14 +61,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   dense: true,
                   contentPadding:
                       EdgeInsets.symmetric(vertical: 0, horizontal: 0),
-                  leading: Padding(
-                    padding: const EdgeInsets.only(left: 6),
-                    child: Icon(Icons.account_circle,
-                        size: 40, color: Colors.white),
+                  leading: GestureDetector(
+                    onDoubleTap: () async {
+                      SharedPreferences preferences =
+                          await SharedPreferences.getInstance();
+                      preferences.setBool('darkTheme', !Get.isDarkMode);
+                      Get.changeThemeMode(
+                          Get.isDarkMode ? ThemeMode.light : ThemeMode.dark);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 6),
+                      child: Icon(Icons.account_circle,
+                          size: 40, color: Colors.white),
+                    ),
                   ),
                   title: Text(
                     'Welcome ${user != null ? user!.name : 'User'}!',
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(color: Colors.white, fontSize: 20),
+                  ),
+                  trailing: IconButton(
+                    onPressed: () {},
+                    icon: Icon(Icons.message, color: Colors.white),
                   ),
                 ),
               ),

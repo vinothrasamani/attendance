@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,8 +17,27 @@ void main() async {
 
 final baseColor = const Color.fromARGB(255, 3, 0, 184);
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    loadTheme();
+    super.initState();
+  }
+
+  void loadTheme() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    final isDark = preferences.getBool('darkTheme');
+    if (isDark != null) {
+      Get.changeThemeMode(isDark ? ThemeMode.dark : ThemeMode.light);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +45,16 @@ class MyApp extends StatelessWidget {
       title: 'Attendance',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: baseColor),
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: baseColor, brightness: Brightness.light),
         useMaterial3: true,
       ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: baseColor, brightness: Brightness.dark),
+        useMaterial3: true,
+      ),
+      themeMode: Get.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: SplashScreen(),
     );
   }
