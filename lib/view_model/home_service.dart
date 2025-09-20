@@ -44,16 +44,13 @@ class HomeService {
   }
 
   static String _calculateAttendanceStatus(AttendanceData item) {
-    if (item.checkIn == null || item.checkOut == null) {
-      return "Absent";
+    if (item.checkIn != null && item.checkOut == null) {
+      return "In Complete";
     }
     final start = item.checkIn!;
     final end = item.checkOut!;
     final durationInMinutes = end.difference(start).inMinutes;
     final durationInHours = durationInMinutes / 60;
-
-    print("Worked: ${durationInHours.toStringAsFixed(2)} hours");
-
     if (durationInHours >= 8) {
       return "Present";
     } else if (durationInHours >= 4) {
@@ -65,8 +62,7 @@ class HomeService {
 
   static Future<bool> addStatus(WidgetRef ref) async {
     final user = ref.read(userProvider);
-    final res = await BaseFile.postMethod('check-status',
-        {'userId': user?.id, 'day': DateTime.now().toIso8601String()});
+    final res = await BaseFile.postMethod('check-status', {'userId': user?.id});
     final data = jsonDecode(res);
     if (data['success']) {
       Get.snackbar(

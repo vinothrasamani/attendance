@@ -2,6 +2,7 @@ import 'package:attendance/model/attendance_model.dart';
 import 'package:attendance/view_model/home_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class Attendance extends ConsumerStatefulWidget {
@@ -31,7 +32,6 @@ class _AttendanceState extends ConsumerState<Attendance> {
     final attData = ref.watch(HomeService.attendanceData);
     final list = ref.watch(HomeService.list);
     final isLoading = ref.watch(HomeService.isLoading);
-    print(attData);
 
     Color getColor(String status) {
       switch (status) {
@@ -41,13 +41,21 @@ class _AttendanceState extends ConsumerState<Attendance> {
           return Colors.red;
         case "Half Day":
           return Colors.orange;
+        case "In Complete":
+          return Colors.blue;
         default:
           return Colors.grey;
       }
     }
 
     Widget buildLegend() {
-      final statuses = ["Present", "Absent", "Half Day"];
+      final statuses = [
+        "Present",
+        "Absent",
+        "Half Day",
+        "In Complete",
+        "No Data"
+      ];
       return Card(
         margin: EdgeInsets.all(8.0),
         child: Container(
@@ -249,11 +257,11 @@ class _AttendanceState extends ConsumerState<Attendance> {
                           ),
                           SizedBox(height: 15),
                           Text(
-                            'Check In : ${info == null || info.checkIn == null ? 'No Data' : info.checkIn!.toIso8601String().split('T')[1]}',
+                            'Check In : ${info == null || info.checkIn == null ? '00:00 AM' : DateFormat('hh:mm a').format(info.checkIn!)}',
                           ),
-                          SizedBox(height: 15),
+                          SizedBox(height: 6),
                           Text(
-                            'Check In : ${info == null || info.checkOut == null ? 'No Data' : info.checkOut!.toIso8601String().split('T')[1]}',
+                            'Check out : ${info == null || info.checkOut == null ? '00:00 AM' : DateFormat('hh:mm a').format(info.checkOut!)}',
                           ),
                         ],
                       ),

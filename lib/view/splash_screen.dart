@@ -1,6 +1,6 @@
 import 'package:attendance/main.dart';
 import 'package:attendance/view/auth_screen.dart';
-import 'package:attendance/view/home_screen.dart';
+import 'package:attendance/view/biometric_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,7 +25,7 @@ class _SplashScreenState extends State<SplashScreen> {
       SharedPreferences preferences = await SharedPreferences.getInstance();
       final user = preferences.getString('user');
       if (user != null) {
-        screen = HomeScreen();
+        screen = BiometricScreen();
       }
     });
     Get.off(
