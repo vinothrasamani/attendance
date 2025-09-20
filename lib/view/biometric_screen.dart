@@ -1,7 +1,42 @@
+import 'package:attendance/view/auth_screen.dart';
+import 'package:attendance/view_model/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 
-class BiometricScreen extends StatelessWidget {
+class BiometricScreen extends ConsumerStatefulWidget {
   const BiometricScreen({super.key});
+
+  @override
+  ConsumerState<BiometricScreen> createState() => _BiometricScreenState();
+}
+
+class _BiometricScreenState extends ConsumerState<BiometricScreen> {
+  @override
+  void initState() {
+    initiate();
+    super.initState();
+  }
+
+  void initiate() async {
+    AuthService.isBiomatricSupported().then((isSupported) async {
+      if (isSupported) {
+        final canDo = await AuthService.checkBiometrics();
+        if (canDo) {
+          await AuthService.authendicate();
+        }
+      } else {
+        Get.off(() => AuthScreen(), transition: Transition.rightToLeft);
+        Get.snackbar(
+          'Not Supported!',
+          'Device doesn\'t support local authentications!',
+          borderRadius: 5,
+          backgroundColor: Colors.redAccent,
+          colorText: Colors.white,
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,6 +48,7 @@ class BiometricScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                SizedBox(height: 20),
                 Image.asset('assets/biometric.png'),
                 SizedBox(height: 25),
                 Padding(
@@ -31,25 +67,42 @@ class BiometricScreen extends StatelessWidget {
                       Container(
                         width: double.infinity,
                         padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: OutlinedButton(
+                          onPressed: () {
+                            initiate();
+                          },
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              side: BorderSide(color: Colors.white),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 30, vertical: 15),
+                          ),
+                          child: Text('Retry'),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(horizontal: 20),
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Get.off(() => AuthScreen(),
+                                transition: Transition.rightToLeft);
+                          },
                           style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 30, vertical: 15)),
-                          child: Text('Continue'),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 30, vertical: 15),
+                          ),
+                          child: Text('Login'),
                         ),
                       ),
                       SizedBox(height: 20),
-                      TextButton(
-                        onPressed: () {},
-                        child: Text(
-                          'Login with username and password!',
-                          style: TextStyle(color: Colors.white54),
-                        ),
-                      ),
                     ],
                   ),
                 ),

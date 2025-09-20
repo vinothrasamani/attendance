@@ -42,7 +42,7 @@ dependencies:
   slide_to_act: ^2.0.2
   table_calendar: ^3.2.0
   intl: ^0.20.2
-  local_auth: ^2.3.0
+  local_auth_android: ^1.0.51
 
 dev_dependencies:
   flutter_test:

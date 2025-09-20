@@ -200,6 +200,9 @@ class _AttendanceState extends ConsumerState<Attendance> {
               ),
               SizedBox(height: 20),
               Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(0),
+                ),
                 child: Builder(
                   builder: (context) {
                     final dayKey =
