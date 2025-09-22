@@ -76,7 +76,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
                   title: Text(
-                    'Welcome ${user != null ? user!.name : 'User'}!',
+                    'Welcome ${user != null ? '${user!.firstName} ${user!.middleName ?? ''} ${user!.lastName ?? ''}' : 'User'}!',
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(color: Colors.white, fontSize: 20),
                   ),

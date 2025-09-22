@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class BaseFile {
-  static String baseUrl = 'http://192.168.1.8:8000/api';
+  static String baseUrl = 'http://192.168.1.112:8010/api';
 
   static Future<dynamic> postMethod(String endpoint, Object object) async {
     try {
@@ -23,7 +23,7 @@ class BaseFile {
         });
       }
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint('Error : $e');
       return jsonEncode({'success': false, 'message': 'Something went wrong!'});
     }
   }

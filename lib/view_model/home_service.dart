@@ -62,7 +62,8 @@ class HomeService {
 
   static Future<bool> addStatus(WidgetRef ref) async {
     final user = ref.read(userProvider);
-    final res = await BaseFile.postMethod('check-status', {'userId': user?.id});
+    final res =
+        await BaseFile.postMethod('check-status', {'userId': user?.oid});
     final data = jsonDecode(res);
     if (data['success']) {
       Get.snackbar(
