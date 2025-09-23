@@ -1,3 +1,7 @@
+// To parse this JSON data, do
+//
+//     final attendanceModel = attendanceModelFromJson(jsonString);
+
 import 'dart:convert';
 
 AttendanceModel attendanceModelFromJson(String str) =>
@@ -33,39 +37,65 @@ class AttendanceModel {
 }
 
 class AttendanceData {
-  int id;
-  DateTime? checkIn;
-  DateTime? checkOut;
-  DateTime createdAt;
-  DateTime updatedAt;
-  int userId;
+  String oid;
+  String employeeCode;
+  String deviceName;
+  DateTime date;
+  dynamic sNo;
+  String inout;
+  String companyId;
+  String branchId;
+  dynamic optimisticLockField;
+  dynamic gcRecord;
+  String? paymentType;
+  String month;
+  String year;
 
   AttendanceData({
-    required this.id,
-    required this.checkIn,
-    required this.checkOut,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.userId,
+    required this.oid,
+    required this.employeeCode,
+    required this.deviceName,
+    required this.date,
+    required this.sNo,
+    required this.inout,
+    required this.companyId,
+    required this.branchId,
+    required this.optimisticLockField,
+    required this.gcRecord,
+    required this.paymentType,
+    required this.month,
+    required this.year,
   });
 
   factory AttendanceData.fromJson(Map<String, dynamic> json) => AttendanceData(
-        id: json["id"],
-        checkIn: DateTime.parse(json["check_in"]),
-        checkOut: json["check_out"] == null
-            ? null
-            : DateTime.parse(json["check_out"]),
-        createdAt: DateTime.parse(json["created_at"]),
-        updatedAt: DateTime.parse(json["updated_at"]),
-        userId: json["user_id"],
+        oid: json["OID"],
+        employeeCode: json["EmployeeCode"],
+        deviceName: json["DeviceName"],
+        date: DateTime.parse(json["Date"]),
+        sNo: json["SNo"],
+        inout: json["INOUT"],
+        companyId: json["CompanyId"],
+        branchId: json["BranchId"],
+        optimisticLockField: json["OptimisticLockField"],
+        gcRecord: json["GCRecord"],
+        paymentType: json["PaymentType"],
+        month: json["Month"],
+        year: json["Year"],
       );
 
   Map<String, dynamic> toJson() => {
-        "id": id,
-        "check_in": checkIn?.toIso8601String(),
-        "check_out": checkOut?.toIso8601String(),
-        "created_at": createdAt.toIso8601String(),
-        "updated_at": updatedAt.toIso8601String(),
-        "user_id": userId,
+        "OID": oid,
+        "EmployeeCode": employeeCode,
+        "DeviceName": deviceName,
+        "Date": date.toIso8601String(),
+        "SNo": sNo,
+        "INOUT": inout,
+        "CompanyId": companyId,
+        "BranchId": branchId,
+        "OptimisticLockField": optimisticLockField,
+        "GCRecord": gcRecord,
+        "PaymentType": paymentType,
+        "Month": month,
+        "Year": year,
       };
 }

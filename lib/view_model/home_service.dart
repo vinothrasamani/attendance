@@ -14,43 +14,64 @@ class HomeService {
   static final selectedDay = StateProvider<DateTime?>((ref) => null);
   static final attendanceData =
       StateProvider<Map<DateTime, String>>((ref) => {});
-  static final list = StateProvider<List<AttendanceData>>((ref) => []);
+  static final list =
+      StateProvider<Map<String, List<AttendanceData>>>((ref) => {});
 
   static Future<void> fetchAttendance(WidgetRef ref, DateTime day) async {
     ref.read(isLoading.notifier).state = true;
     final user = ref.read(userProvider);
+
     try {
-      final res =
-          await BaseFile.getMethod('fetch-attendance?id=${user?.id}&&day=$day');
+      final res = await BaseFile.getMethod(
+          'fetch-attendance?code=${user?.staffCode}&&day=$day');
+      print(res);
       final data = attendanceModelFromJson(res);
       if (data.success) {
-        ref.read(list.notifier).state = data.data;
-        final Map<DateTime, String> newAttendanceData = {};
+        Map<String, List<AttendanceData>> grouped = {};
         for (var item in data.data) {
-          final status = _calculateAttendanceStatus(item);
-          newAttendanceData[DateTime.utc(item.createdAt.year,
-              item.createdAt.month, item.createdAt.day)] = status;
+          final dateKey =
+              '${DateTime(item.date.year, item.date.month, item.date.day)}';
+          grouped.putIfAbsent((dateKey), () => []).add(item);
+        }
+        ref.read(list.notifier).state = grouped;
+        final Map<DateTime, String> newAttendanceData = {};
+        for (var entry in grouped.entries) {
+          final status = _calculateAttendanceStatus(entry.value);
+          newAttendanceData[DateTime.parse(entry.key)] = status;
         }
         final a = ref.read(attendanceData.notifier).state;
         a.clear();
         a.addAll(newAttendanceData);
+        print(newAttendanceData);
         ref.read(isLoading.notifier).state = false;
       } else {
         ref.read(isLoading.notifier).state = false;
       }
     } catch (e) {
+      print(e);
       ref.read(isLoading.notifier).state = false;
     }
   }
 
-  static String _calculateAttendanceStatus(AttendanceData item) {
-    if (item.checkIn != null && item.checkOut == null) {
-      return "In Complete";
+  static String _calculateAttendanceStatus(List<AttendanceData> punches) {
+    if (punches.isEmpty) return "Absent";
+    if (punches.length == 1) {
+      return 'In Complete';
     }
-    final start = item.checkIn!;
-    final end = item.checkOut!;
-    final durationInMinutes = end.difference(start).inMinutes;
+    punches.sort((a, b) => a.date.compareTo(b.date));
+    final firstIn = punches.firstWhere(
+      (p) => p.inout.toLowerCase() == "in",
+      orElse: () => punches.first,
+    );
+
+    final lastOut = punches.lastWhere(
+      (p) => p.inout.toLowerCase() == "out",
+      orElse: () => punches.last,
+    );
+
+    final durationInMinutes = lastOut.date.difference(firstIn.date).inMinutes;
     final durationInHours = durationInMinutes / 60;
+
     if (durationInHours >= 8) {
       return "Present";
     } else if (durationInHours >= 4) {

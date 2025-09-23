@@ -5,6 +5,7 @@ import 'package:attendance/view/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth_android/local_auth_android.dart';
+// ignore: depend_on_referenced_packages
 import 'package:local_auth_platform_interface/local_auth_platform_interface.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:attendance/base_file.dart';
