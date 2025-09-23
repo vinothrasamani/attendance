@@ -21,7 +21,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   void initState() {
-    ref.read(userProvider.notifier).loadUser();
+    ref.read(userProvider.notifier).loadUser().then((_) {
+      HomeService.fetchStatus(ref);
+    });
     super.initState();
   }
 

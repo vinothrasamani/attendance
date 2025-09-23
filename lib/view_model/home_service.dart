@@ -82,12 +82,26 @@ class HomeService {
     }
   }
 
-  static Future<bool> addStatus(WidgetRef ref) async {
+  static Future<bool> fetchStatus(WidgetRef ref) async {
+    final user = ref.read(userProvider);
+    final res = await BaseFile.getMethod(
+      'fetch-status?code=${user?.staffCode}&day=${DateTime.now()}',
+    );
+    final data = attendanceModelFromJson(res);
+    if (data.success) {
+      final len = data.data.length;
+      ref.read(current.notifier).state = len == 0 || len > 1 ? false : true;
+    }
+    return true;
+  }
+
+  static Future<bool> addStatus(WidgetRef ref, bool b) async {
     final user = ref.read(userProvider);
     final res =
         await BaseFile.postMethod('check-status', {'userId': user?.oid});
     final data = jsonDecode(res);
     if (data['success']) {
+      ref.read(current.notifier).state = b;
       Get.snackbar(
         'Success',
         data['message'],
@@ -97,6 +111,7 @@ class HomeService {
       );
       return true;
     } else {
+      ref.read(current.notifier).state = !b;
       Get.snackbar(
         'Failed',
         data['message'],

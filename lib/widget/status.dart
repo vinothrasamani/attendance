@@ -1,4 +1,5 @@
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
+
 import 'dart:math';
 import 'package:attendance/view_model/home_service.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,6 +12,9 @@ class Status extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Size size = MediaQuery.of(context).size;
+    final clr1 = Colors.red[800]!;
+    final clr2 = Colors.green;
+
     return SingleChildScrollView(
       child: Container(
         constraints: BoxConstraints(minHeight: size.height - 200),
@@ -43,7 +47,7 @@ class Status extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 // child: SlideAction(
-                //   innerColor: Colors.green,
+                //   innerColor: Colors.clr1,
                 //   outerColor: baseColor,
                 //   textStyle: TextStyle(fontSize: 20, color: Colors.white),
                 //   text: 'Slide to Mark',
@@ -72,12 +76,11 @@ class Status extends ConsumerWidget {
                         ),
                         customStyleBuilder: (context, local, global) {
                           if (global.position <= 0.0) {
-                            return ToggleStyle(
-                                backgroundColor: Colors.red[800]);
+                            return ToggleStyle(backgroundColor: clr2);
                           }
                           return ToggleStyle(
                               backgroundGradient: LinearGradient(
-                            colors: [Colors.green, Colors.red[800]!],
+                            colors: [clr1, clr2],
                             stops: [
                               global.position -
                                   (1 - 2 * max(0, global.position - 0.5)) * 0.7,
@@ -91,15 +94,13 @@ class Status extends ConsumerWidget {
                         padding: EdgeInsets.all(10),
                         loadingIconBuilder: (context, global) =>
                             CupertinoActivityIndicator(
-                                color: Color.lerp(Colors.red[800], Colors.green,
-                                    global.position)),
-                        onChanged: (b) =>
-                            ref.read(HomeService.current.notifier).state = b,
+                                color: Color.lerp(clr2, clr1, global.position)),
+                        onChanged: (b) async =>
+                            await HomeService.addStatus(ref, b),
                         iconBuilder: (value) => value
-                            ? const Icon(Icons.arrow_back,
-                                color: Colors.green, size: 32.0)
+                            ? Icon(Icons.arrow_back, color: clr1, size: 32.0)
                             : Icon(Icons.arrow_forward,
-                                color: Colors.red[800], size: 32.0),
+                                color: clr2, size: 32.0),
                         textBuilder: (value) => value
                             ? const Center(child: Text('Check Out'))
                             : const Center(child: Text('Check In')),
