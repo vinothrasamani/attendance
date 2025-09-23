@@ -1,8 +1,9 @@
-import 'package:attendance/main.dart';
+import 'package:animated_toggle_switch/animated_toggle_switch.dart';
+import 'dart:math';
 import 'package:attendance/view_model/home_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:slide_to_act/slide_to_act.dart';
 
 class Status extends ConsumerWidget {
   const Status({super.key});
@@ -41,12 +42,70 @@ class Status extends ConsumerWidget {
               SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30),
-                child: SlideAction(
-                  innerColor: Colors.green,
-                  outerColor: baseColor,
-                  textStyle: TextStyle(fontSize: 20, color: Colors.white),
-                  text: 'Slide to Mark',
-                  onSubmit: () => HomeService.addStatus(ref),
+                // child: SlideAction(
+                //   innerColor: Colors.green,
+                //   outerColor: baseColor,
+                //   textStyle: TextStyle(fontSize: 20, color: Colors.white),
+                //   text: 'Slide to Mark',
+                //   onSubmit: () => HomeService.addStatus(ref),
+                // ),
+                // ref.read(HomeService.current.notifier).state = b,
+                child: DefaultTextStyle.merge(
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold),
+                  child: IconTheme.merge(
+                    data: const IconThemeData(color: Colors.white),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: AnimatedToggleSwitch<bool>.dual(
+                        current: ref.watch(HomeService.current),
+                        first: false,
+                        second: true,
+                        spacing: 45.0,
+                        animationDuration: const Duration(milliseconds: 600),
+                        style: const ToggleStyle(
+                          borderColor: Colors.transparent,
+                          indicatorColor: Colors.white,
+                          backgroundColor: Colors.black,
+                        ),
+                        customStyleBuilder: (context, local, global) {
+                          if (global.position <= 0.0) {
+                            return ToggleStyle(
+                                backgroundColor: Colors.red[800]);
+                          }
+                          return ToggleStyle(
+                              backgroundGradient: LinearGradient(
+                            colors: [Colors.green, Colors.red[800]!],
+                            stops: [
+                              global.position -
+                                  (1 - 2 * max(0, global.position - 0.5)) * 0.7,
+                              global.position +
+                                  max(0, 2 * (global.position - 0.5)) * 0.7,
+                            ],
+                          ));
+                        },
+                        borderWidth: 6.0,
+                        height: 68.0,
+                        padding: EdgeInsets.all(10),
+                        loadingIconBuilder: (context, global) =>
+                            CupertinoActivityIndicator(
+                                color: Color.lerp(Colors.red[800], Colors.green,
+                                    global.position)),
+                        onChanged: (b) =>
+                            ref.read(HomeService.current.notifier).state = b,
+                        iconBuilder: (value) => value
+                            ? const Icon(Icons.arrow_back,
+                                color: Colors.green, size: 32.0)
+                            : Icon(Icons.arrow_forward,
+                                color: Colors.red[800], size: 32.0),
+                        textBuilder: (value) => value
+                            ? const Center(child: Text('Check Out'))
+                            : const Center(child: Text('Check In')),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],

@@ -39,10 +39,10 @@ dependencies:
   shared_preferences: ^2.5.3
   flutter_riverpod: ^2.6.1
   uuid: ^4.5.1
-  slide_to_act: ^2.0.2
   table_calendar: ^3.2.0
   intl: ^0.20.2
   local_auth_android: ^1.0.51
+  animated_toggle_switch: ^0.8.5
 
 dev_dependencies:
   flutter_test:

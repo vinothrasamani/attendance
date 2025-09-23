@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 
 class HomeService {
   static final isLoading = StateProvider<bool>((ref) => false);
+  static final current = StateProvider<bool>((ref) => false);
   static final index = StateProvider<int>((ref) => 0);
   static final focusedDay = StateProvider<DateTime>((ref) => DateTime.now());
   static final selectedDay = StateProvider<DateTime?>((ref) => null);
