@@ -1,3 +1,4 @@
+import 'package:attendance/base_file.dart';
 import 'package:attendance/main.dart';
 import 'package:attendance/model/user_model.dart';
 import 'package:attendance/view_model/home_service.dart';
@@ -21,10 +22,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   void initState() {
-    ref.read(userProvider.notifier).loadUser().then((_) {
-      HomeService.fetchStatus(ref);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      load();
     });
     super.initState();
+  }
+
+  void load() async {
+    final ip = BaseFile.ip;
+    final port = BaseFile.port;
+    await ref.read(userProvider.notifier).loadUser().then((_) async {
+      ref.read(HomeService.isChecking.notifier).state = true;
+      await HomeService.isServerReachable(ip, port).then((val) async {
+        ref.read(HomeService.isChecking.notifier).state = false;
+        ref.read(HomeService.isOk.notifier).state = val;
+        if (val) {
+          await HomeService.fetchStatus(ref);
+        }
+      });
+    });
   }
 
   Widget btn(String title, bool isIt, IconData icon, VoidCallback ontap) {
@@ -47,6 +63,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     user = ref.watch(userProvider);
     final index = ref.watch(HomeService.index);
+    final isOk = ref.watch(HomeService.isOk);
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -89,33 +107,80 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               Expanded(
-                child:
-                    ref.watch(HomeService.index) == 0 ? Status() : Attendance(),
+                child: ref.watch(HomeService.isChecking)
+                    ? Center(child: CircularProgressIndicator())
+                    : !isOk
+                        ? Center(
+                            child: Container(
+                              padding: EdgeInsets.all(10),
+                              margin: EdgeInsets.symmetric(horizontal: 20),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Builder(builder: (context) {
+                                    final c = Colors.red[800]!;
+                                    return CircleAvatar(
+                                      radius: 35,
+                                      backgroundColor: c.withAlpha(50),
+                                      child: Icon(
+                                        Icons.wifi_off,
+                                        size: 30,
+                                        color: c,
+                                      ),
+                                    );
+                                  }),
+                                  SizedBox(height: 10),
+                                  Text(
+                                    'Couldn\'t reach the server. Please connect with an appropriate wifi!',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  SizedBox(height: 10),
+                                  ElevatedButton(
+                                    onPressed: load,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: baseColor,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                    child: Text('Retry'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : ref.watch(HomeService.index) == 0
+                            ? Status()
+                            : Attendance(),
               ),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: Container(
-        height: 58,
-        margin: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
-        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: baseColor,
-        ),
-        child: Row(
-          children: [
-            btn('Today Status', index == 0, Icons.check_circle_outline, () {
-              ref.read(HomeService.index.notifier).state = 0;
-            }),
-            VerticalDivider(color: Colors.white60),
-            btn('Attendance', index == 1, Icons.fact_check, () {
-              ref.read(HomeService.index.notifier).state = 1;
-            }),
-          ],
-        ),
-      ),
+      bottomNavigationBar: !isOk
+          ? null
+          : Container(
+              height: 58,
+              margin: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
+              padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: baseColor,
+              ),
+              child: Row(
+                children: [
+                  btn('Today Status', index == 0, Icons.check_circle_outline,
+                      () {
+                    ref.read(HomeService.index.notifier).state = 0;
+                  }),
+                  VerticalDivider(color: Colors.white60),
+                  btn('Attendance', index == 1, Icons.fact_check, () {
+                    ref.read(HomeService.index.notifier).state = 1;
+                  }),
+                ],
+              ),
+            ),
     );
   }
 }

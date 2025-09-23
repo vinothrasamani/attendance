@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class BaseFile {
-  static String baseUrl = 'http://192.168.1.112:8010/api';
+  static String ip = '192.168.1.112';
+  static int port = 8010;
+  static String baseUrl = 'http://$ip:$port/api';
 
   static Future<dynamic> postMethod(String endpoint, Object object) async {
     try {

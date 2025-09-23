@@ -76,7 +76,7 @@ class User {
   final String qualification;
   final String bankBranch;
   final String ifscCode;
-  final String token;
+  final String? token;
 
   // Nullable fields
   final String? photo;
@@ -233,7 +233,7 @@ class User {
         qualification: json["Qualification"],
         bankBranch: json["BankBranch"],
         ifscCode: json["IFSCCode"],
-        token: json["token"],
+        token: json["token"] ?? '',
         photo: json["Photo"],
         manager: json["Manager"],
         permanentAddress: json["PermanentAddress"],

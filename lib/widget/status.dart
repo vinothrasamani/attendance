@@ -1,5 +1,4 @@
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
-
 import 'dart:math';
 import 'package:attendance/view_model/home_service.dart';
 import 'package:flutter/cupertino.dart';
@@ -12,8 +11,8 @@ class Status extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Size size = MediaQuery.of(context).size;
-    final clr1 = Colors.red[800]!;
-    final clr2 = Colors.green;
+    final clr1 = Colors.green;
+    final clr2 = Colors.red[800]!;
 
     return SingleChildScrollView(
       child: Container(
@@ -46,18 +45,10 @@ class Status extends ConsumerWidget {
               SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30),
-                // child: SlideAction(
-                //   innerColor: Colors.clr1,
-                //   outerColor: baseColor,
-                //   textStyle: TextStyle(fontSize: 20, color: Colors.white),
-                //   text: 'Slide to Mark',
-                //   onSubmit: () => HomeService.addStatus(ref),
-                // ),
-                // ref.read(HomeService.current.notifier).state = b,
                 child: DefaultTextStyle.merge(
                   style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 20.0,
+                      fontSize: 18.0,
                       fontWeight: FontWeight.bold),
                   child: IconTheme.merge(
                     data: const IconThemeData(color: Colors.white),
@@ -102,8 +93,8 @@ class Status extends ConsumerWidget {
                             : Icon(Icons.arrow_forward,
                                 color: clr2, size: 32.0),
                         textBuilder: (value) => value
-                            ? const Center(child: Text('Check Out'))
-                            : const Center(child: Text('Check In')),
+                            ? const Center(child: Text('Swipe to Check-Out'))
+                            : const Center(child: Text('Swipe to Check-In')),
                       ),
                     ),
                   ),
