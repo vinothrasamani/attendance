@@ -21,8 +21,7 @@ class HomeService {
   static final selectedDay = StateProvider<DateTime?>((ref) => null);
   static final attendanceData =
       StateProvider<Map<DateTime, String>>((ref) => {});
-  static final list =
-      StateProvider<Map<String, List<AttendanceData>>>((ref) => {});
+  static final list = StateProvider<List<AttendanceData>>((ref) => []);
 
   static Future<void> fetchAttendance(WidgetRef ref, DateTime day) async {
     ref.read(isLoading.notifier).state = true;
@@ -30,20 +29,15 @@ class HomeService {
 
     try {
       final res = await BaseFile.getMethod(
-          'fetch-attendance?code=${user?.staffCode}&&day=$day');
+          'fetch-attendance?code=${user?.staffCode}&day=$day');
       final data = attendanceModelFromJson(res);
       if (data.success) {
-        Map<String, List<AttendanceData>> grouped = {};
-        for (var item in data.data) {
-          final dateKey =
-              '${DateTime(item.date.year, item.date.month, item.date.day)}';
-          grouped.putIfAbsent((dateKey), () => []).add(item);
-        }
-        ref.read(list.notifier).state = grouped;
+        ref.read(list.notifier).state = data.data;
         final Map<DateTime, String> newAttendanceData = {};
-        for (var entry in grouped.entries) {
-          final status = _calculateAttendanceStatus(entry.value);
-          newAttendanceData[DateTime.parse(entry.key)] = status;
+        for (var item in data.data) {
+          final status = _calculateAttendanceStatus(item);
+          newAttendanceData[DateTime.utc(
+              item.date.year, item.date.month, item.date.day)] = status;
         }
         final a = ref.read(attendanceData.notifier).state;
         a.clear();
@@ -57,21 +51,13 @@ class HomeService {
     }
   }
 
-  static String _calculateAttendanceStatus(List<AttendanceData> punches) {
-    if (punches.isEmpty) return "Absent";
-    if (punches.length == 1) {
-      return 'In Complete';
+  static String _calculateAttendanceStatus(AttendanceData item) {
+    if (item.inTime != null && item.outTime == null) {
+      return "In Complete";
     }
-    punches.sort((a, b) => a.date.compareTo(b.date));
-    final firstIn = punches.firstWhere(
-      (p) => p.inout.toLowerCase() == "in",
-      orElse: () => punches.first,
-    );
-    final lastOut = punches.lastWhere(
-      (p) => p.inout.toLowerCase() == "out",
-      orElse: () => punches.last,
-    );
-    final durationInMinutes = lastOut.date.difference(firstIn.date).inMinutes;
+    final start = item.inTime!;
+    final end = item.outTime!;
+    final durationInMinutes = end.difference(start).inMinutes;
     final durationInHours = durationInMinutes / 60;
     if (durationInHours >= 8) {
       return "Present";

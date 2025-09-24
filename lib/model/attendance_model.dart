@@ -1,7 +1,3 @@
-// To parse this JSON data, do
-//
-//     final attendanceModel = attendanceModelFromJson(jsonString);
-
 import 'dart:convert';
 
 AttendanceModel attendanceModelFromJson(String str) =>
@@ -37,65 +33,34 @@ class AttendanceModel {
 }
 
 class AttendanceData {
-  String oid;
   String employeeCode;
-  String deviceName;
+  String? deviceName;
   DateTime date;
-  dynamic sNo;
-  String inout;
-  String companyId;
-  String branchId;
-  dynamic optimisticLockField;
-  dynamic gcRecord;
-  String? paymentType;
-  String month;
-  String year;
+  DateTime? inTime;
+  DateTime? outTime;
 
   AttendanceData({
-    required this.oid,
     required this.employeeCode,
     required this.deviceName,
     required this.date,
-    required this.sNo,
-    required this.inout,
-    required this.companyId,
-    required this.branchId,
-    required this.optimisticLockField,
-    required this.gcRecord,
-    required this.paymentType,
-    required this.month,
-    required this.year,
+    required this.inTime,
+    required this.outTime,
   });
 
   factory AttendanceData.fromJson(Map<String, dynamic> json) => AttendanceData(
-        oid: json["OID"],
         employeeCode: json["EmployeeCode"],
         deviceName: json["DeviceName"],
         date: DateTime.parse(json["Date"]),
-        sNo: json["SNo"],
-        inout: json["INOUT"],
-        companyId: json["CompanyId"],
-        branchId: json["BranchId"],
-        optimisticLockField: json["OptimisticLockField"],
-        gcRecord: json["GCRecord"],
-        paymentType: json["PaymentType"],
-        month: json["Month"],
-        year: json["Year"],
+        inTime: DateTime.parse(json["InTime"]),
+        outTime: DateTime.parse(json["OutTime"]),
       );
 
   Map<String, dynamic> toJson() => {
-        "OID": oid,
         "EmployeeCode": employeeCode,
         "DeviceName": deviceName,
-        "Date": date.toIso8601String(),
-        "SNo": sNo,
-        "INOUT": inout,
-        "CompanyId": companyId,
-        "BranchId": branchId,
-        "OptimisticLockField": optimisticLockField,
-        "GCRecord": gcRecord,
-        "PaymentType": paymentType,
-        "Month": month,
-        "Year": year,
+        "Date":
+            "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
+        "InTime": inTime?.toIso8601String(),
+        "OutTime": outTime?.toIso8601String(),
       };
 }

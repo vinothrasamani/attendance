@@ -30,55 +30,53 @@ class UserModel {
 
 class User {
   final String oid;
-  final String sequentialNumber;
-  final String applicationNo;
-  final String department;
-  final String designation;
-  final String grade;
-  final String type;
-  final String shift;
-  final String weekOff;
-  final String doj;
-  final String fatherName;
-  final String employeeCodeInDevice;
-  final String attendanceMachineIntegrated;
-  final String gender;
-  final String maritalStatus;
-  final String nationality;
-  final String religion;
-  final String dob;
-  final String pfApplicable;
-  final String esiApplicable;
-  final String ptApplicable;
-  final String aadharNo;
-  final String panNo;
-  final String appointAs;
-  final String wagesType;
-  final String salaryBasisOn;
-  final String paymentType;
-  final String bankName;
-  final String branchName;
-  final String accountNo;
-  final String otApplicable;
-  final String otRate;
-  final String status;
+  final String? sequentialNumber;
+  final String? applicationNo;
+  final String? department;
+  final String? designation;
+  final String? grade;
+  final String? type;
+  final String? shift;
+  final String? weekOff;
+  final String? doj;
+  final String? fatherName;
+  final String? employeeCodeInDevice;
+  final String? attendanceMachineIntegrated;
+  final String? gender;
+  final String? maritalStatus;
+  final String? nationality;
+  final String? religion;
+  final String? dob;
+  final String? pfApplicable;
+  final String? esiApplicable;
+  final String? ptApplicable;
+  final String? aadharNo;
+  final String? panNo;
+  final String? appointAs;
+  final String? wagesType;
+  final String? salaryBasisOn;
+  final String? paymentType;
+  final String? bankName;
+  final String? branchName;
+  final String? accountNo;
+  final String? otApplicable;
+  final String? otRate;
+  final String? status;
   final String companyId;
   final String branchId;
-  final String mobilePhone;
-  final String optimisticLockField;
+  final String? mobilePhone;
+  final String? optimisticLockField;
   final String staffCode;
-  final String empDivision;
-  final String division;
-  final String incrementDate;
-  final String category;
-  final String title;
+  final String? empDivision;
+  final String? division;
+  final String? incrementDate;
+  final String? category;
+  final String? title;
   final String firstName;
-  final String qualification;
-  final String bankBranch;
-  final String ifscCode;
+  final String? qualification;
+  final String? bankBranch;
+  final String? ifscCode;
   final String? token;
-
-  // Nullable fields
   final String? photo;
   final String? manager;
   final String? permanentAddress;
@@ -109,53 +107,53 @@ class User {
 
   User({
     required this.oid,
-    required this.sequentialNumber,
-    required this.applicationNo,
-    required this.department,
-    required this.designation,
-    required this.grade,
-    required this.type,
-    required this.shift,
-    required this.weekOff,
-    required this.doj,
-    required this.fatherName,
-    required this.employeeCodeInDevice,
-    required this.attendanceMachineIntegrated,
-    required this.gender,
-    required this.maritalStatus,
-    required this.nationality,
-    required this.religion,
-    required this.dob,
-    required this.pfApplicable,
-    required this.esiApplicable,
-    required this.ptApplicable,
-    required this.aadharNo,
-    required this.panNo,
-    required this.appointAs,
-    required this.wagesType,
-    required this.salaryBasisOn,
-    required this.paymentType,
-    required this.bankName,
-    required this.branchName,
-    required this.accountNo,
-    required this.otApplicable,
-    required this.otRate,
-    required this.status,
+    this.sequentialNumber,
+    this.applicationNo,
+    this.department,
+    this.designation,
+    this.grade,
+    this.type,
+    this.shift,
+    this.weekOff,
+    this.doj,
+    this.fatherName,
+    this.employeeCodeInDevice,
+    this.attendanceMachineIntegrated,
+    this.gender,
+    this.maritalStatus,
+    this.nationality,
+    this.religion,
+    this.dob,
+    this.pfApplicable,
+    this.esiApplicable,
+    this.ptApplicable,
+    this.aadharNo,
+    this.panNo,
+    this.appointAs,
+    this.wagesType,
+    this.salaryBasisOn,
+    this.paymentType,
+    this.bankName,
+    this.branchName,
+    this.accountNo,
+    this.otApplicable,
+    this.otRate,
+    this.status,
     required this.companyId,
     required this.branchId,
-    required this.mobilePhone,
-    required this.optimisticLockField,
+    this.mobilePhone,
+    this.optimisticLockField,
     required this.staffCode,
-    required this.empDivision,
-    required this.division,
-    required this.incrementDate,
-    required this.category,
-    required this.title,
+    this.empDivision,
+    this.division,
+    this.incrementDate,
+    this.category,
+    this.title,
     required this.firstName,
-    required this.qualification,
-    required this.bankBranch,
-    required this.ifscCode,
-    required this.token,
+    this.qualification,
+    this.bankBranch,
+    this.ifscCode,
+    this.token,
     this.photo,
     this.manager,
     this.permanentAddress,

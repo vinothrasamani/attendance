@@ -149,7 +149,7 @@ class _AttendanceState extends ConsumerState<Attendance> {
                   },
                   calendarBuilders: CalendarBuilders(
                     defaultBuilder: (context, day, focusedDay) {
-                      final dayKey = DateTime(day.year, day.month, day.day);
+                      final dayKey = DateTime.utc(day.year, day.month, day.day);
                       final status = attData[dayKey];
                       if (status == null && day.isAfter(DateTime.now())) {
                         return null;
@@ -173,7 +173,7 @@ class _AttendanceState extends ConsumerState<Attendance> {
                       );
                     },
                     selectedBuilder: (context, day, focusedDay) {
-                      final dayKey = DateTime(day.year, day.month, day.day);
+                      final dayKey = DateTime.utc(day.year, day.month, day.day);
                       final status = attData[dayKey];
                       if (status == null && day.isAfter(DateTime.now())) {
                         return null;
@@ -205,36 +205,22 @@ class _AttendanceState extends ConsumerState<Attendance> {
                 ),
                 child: Builder(
                   builder: (context) {
-                    final dayKey = DateTime(sDay.year, sDay.month, sDay.day);
+                    final dayKey =
+                        DateTime.utc(sDay.year, sDay.month, sDay.day);
                     final status = attData[dayKey] ??
                         (dayKey.isAfter(DateTime.now()) ? "No Data" : "Absent");
                     final color = getColor(status);
 
-                    List<AttendanceData>? info;
+                    AttendanceData? info;
                     if (list.isNotEmpty) {
                       try {
-                        info = list['$dayKey'];
+                        info = list.firstWhere(
+                          (element) =>
+                              element.date.toIso8601String().split('T')[0] ==
+                              dayKey.toIso8601String().split('T')[0],
+                        );
                       } catch (e) {
                         info = null;
-                      }
-                    }
-
-                    DateTime? checkIn;
-                    DateTime? checkOut;
-
-                    if (info != null && info.isNotEmpty) {
-                      info.sort((a, b) => a.date.compareTo(b.date));
-                      final inPunch = info
-                          .where((p) => p.inout.toLowerCase() == "in")
-                          .toList();
-                      if (inPunch.isNotEmpty) {
-                        checkIn = inPunch.first.date;
-                      }
-                      final outPunch = info
-                          .where((p) => p.inout.toLowerCase() == "out")
-                          .toList();
-                      if (outPunch.isNotEmpty) {
-                        checkOut = outPunch.last.date;
                       }
                     }
 
@@ -273,11 +259,11 @@ class _AttendanceState extends ConsumerState<Attendance> {
                           ),
                           SizedBox(height: 15),
                           Text(
-                            'Check In : ${checkIn == null ? '00:00 AM' : DateFormat('hh:mm:s a').format(checkIn)}',
+                            'Check In : ${info == null || info.inTime == null ? '00:00 AM' : DateFormat('hh:mm a').format(info.inTime!)}',
                           ),
                           SizedBox(height: 6),
                           Text(
-                            'Check Out : ${checkOut == null ? '00:00 AM' : DateFormat('hh:mm:s a').format(checkOut)}',
+                            'Check out : ${info == null || info.outTime == null ? '00:00 AM' : DateFormat('hh:mm a').format(info.outTime!)}',
                           ),
                         ],
                       ),
