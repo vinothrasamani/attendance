@@ -143,7 +143,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   ),
                                   SizedBox(height: 10),
                                   ElevatedButton(
-                                    onPressed: load,
+                                    onPressed: () async {
+                                      await WifiService.connectToWifi(
+                                        ref.read(BaseFile.username),
+                                        ref.read(BaseFile.password),
+                                      );
+                                      load();
+                                    },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: baseColor,
                                       foregroundColor: Colors.white,

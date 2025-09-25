@@ -20,7 +20,7 @@ class WifiService with WidgetsBindingObserver {
     if (state == AppLifecycleState.detached ||
         state == AppLifecycleState.inactive) {
       debugPrint('Connection terminated');
-      WiFiForIoTPlugin.disconnect();
+      // WiFiForIoTPlugin.disconnect();
     } else if (state == AppLifecycleState.resumed) {
       // WifiService.connectToWifi('Airtel_jega_8033', 'air12347');
     }
@@ -45,8 +45,6 @@ class WifiService with WidgetsBindingObserver {
   static Future<void> connectToWifi(String ssid, String password) async {
     ssid = ssid.trim();
     password = password.trim();
-    print(ssid);
-    print(password);
     try {
       // ignore: deprecated_member_use
       List<WifiNetwork?>? networks = await WiFiForIoTPlugin.loadWifiList();

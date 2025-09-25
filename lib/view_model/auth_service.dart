@@ -26,6 +26,7 @@ class AuthService {
     if (school == null) {
       ref.read(canSelectSchool.notifier).state = true;
     } else {
+      ref.read(canSelectSchool.notifier).state = false;
       final data = SchoolData.fromJson(jsonDecode(school));
       ref.read(BaseFile.ip.notifier).state = data.ip;
       ref.read(BaseFile.port.notifier).state = data.port;
@@ -101,7 +102,7 @@ class AuthService {
   static void submit(WidgetRef ref, Object object) async {
     final ip = ref.read(BaseFile.ip);
     final port = ref.read(BaseFile.port);
-    final done = await HomeService.isServerReachable(ip, port);
+    final done = await HomeService.isServerReachable(ip.trim(), port);
     if (!done) {
       Get.snackbar(
         'Network Unavailable!',
@@ -110,28 +111,30 @@ class AuthService {
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
-    }
-    final SharedPreferences preferences = await SharedPreferences.getInstance();
-    final res = await BaseFile.postMethod('login', object, ip, port);
-    final data = userModelFromJson(res);
-    if (data.success) {
-      preferences.setString('user', jsonEncode(data.data));
-      Get.offAll(() => HomeScreen());
-      Get.snackbar(
-        'Logged In',
-        'User logged in successfully!',
-        borderRadius: 5,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
     } else {
-      Get.snackbar(
-        'Failed',
-        data.message,
-        borderRadius: 5,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      final SharedPreferences preferences =
+          await SharedPreferences.getInstance();
+      final res = await BaseFile.postMethod('login', object, ip, port);
+      final data = userModelFromJson(res);
+      if (data.success) {
+        preferences.setString('user', jsonEncode(data.data));
+        Get.offAll(() => HomeScreen());
+        Get.snackbar(
+          'Logged In',
+          'User logged in successfully!',
+          borderRadius: 5,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      } else {
+        Get.snackbar(
+          'Failed',
+          data.message,
+          borderRadius: 5,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
     }
     ref.read(isLoading.notifier).state = false;
   }

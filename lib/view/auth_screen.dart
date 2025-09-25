@@ -3,11 +3,9 @@ import 'package:attendance/install_id_manager.dart';
 import 'package:attendance/main.dart';
 import 'package:attendance/model/school_model.dart';
 import 'package:attendance/view_model/auth_service.dart';
-import 'package:attendance/view_model/internet_checker.dart';
 import 'package:attendance/view_model/wifi_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -32,44 +30,18 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   void submit() async {
     if (_key.currentState!.validate()) {
-      final c = ref.read(AuthService.canSelectSchool);
-      if (!c) {
-        final wifi = await InternetChecker.isWifi();
-        if (wifi) {
-          await WifiService.connectToWifi(
-              ref.read(BaseFile.username), ref.read(BaseFile.password));
-        } else {
-          dialog();
-        }
-      } else {
-        ref.read(AuthService.isLoading.notifier).state = true;
-        token = await InstallIdManager.getInstallId();
-        final body = {'phone': phone, 'code': code, 'token': token};
-        AuthService.submit(ref, body);
+      if (!ref.read(AuthService.canSelectSchool)) {
+        await WifiService.connectToWifi(
+          ref.read(BaseFile.username),
+          ref.read(BaseFile.password),
+        );
       }
+      ref.read(AuthService.isLoading.notifier).state = true;
+      token = await InstallIdManager.getInstallId();
+      final body = {'phone': phone, 'code': code, 'token': token};
+      AuthService.submit(ref, body);
     }
   }
-
-  Future dialog() => Get.dialog(
-        AlertDialog(
-          title: Text('Alert!'),
-          content:
-              Text('Please turn off mobile data and turn on wifi to continue!'),
-          actions: [
-            FilledButton(
-              onPressed: () {
-                Get.back();
-              },
-              style: FilledButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: Text('Close'),
-            ),
-          ],
-        ),
-      );
 
   TextFormField field({
     String? hint,
@@ -114,18 +86,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   Widget schoolCard(SchoolData sd) {
     return InkWell(
       onTap: () async {
-        final wifi = await InternetChecker.isWifi();
-        if (wifi) {
-          ref.read(BaseFile.ip.notifier).state = sd.ip;
-          ref.read(BaseFile.port.notifier).state = sd.port;
-          ref.read(BaseFile.username.notifier).state = sd.username;
-          ref.read(BaseFile.password.notifier).state = sd.password;
-          ref.read(AuthService.canSelectSchool.notifier).state = false;
-          await AuthService.saveSchool(sd);
-          await WifiService.connectToWifi(sd.username, sd.password);
-        } else {
-          dialog();
-        }
+        ref.read(BaseFile.ip.notifier).state = sd.ip;
+        ref.read(BaseFile.port.notifier).state = sd.port;
+        ref.read(BaseFile.username.notifier).state = sd.username;
+        ref.read(BaseFile.password.notifier).state = sd.password;
+        ref.read(AuthService.canSelectSchool.notifier).state = false;
+        await AuthService.saveSchool(sd);
+        await WifiService.connectToWifi(sd.username, sd.password);
       },
       splashColor: Colors.white,
       child: Container(
