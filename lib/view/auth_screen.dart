@@ -1,8 +1,13 @@
+import 'package:attendance/base_file.dart';
 import 'package:attendance/install_id_manager.dart';
 import 'package:attendance/main.dart';
+import 'package:attendance/model/school_model.dart';
 import 'package:attendance/view_model/auth_service.dart';
+import 'package:attendance/view_model/internet_checker.dart';
+import 'package:attendance/view_model/wifi_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -17,17 +22,54 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   @override
   void initState() {
+    load();
     super.initState();
+  }
+
+  void load() async {
+    await WifiService.requestPermissions();
   }
 
   void submit() async {
     if (_key.currentState!.validate()) {
-      ref.read(AuthService.isLoading.notifier).state = true;
-      token = await InstallIdManager.getInstallId();
-      final body = {'phone': phone, 'code': code, 'token': token};
-      AuthService.submit(ref, body);
+      final c = ref.read(AuthService.canSelectSchool);
+      if (!c) {
+        final wifi = await InternetChecker.isWifi();
+        if (wifi) {
+          await WifiService.connectToWifi(
+              ref.read(BaseFile.username), ref.read(BaseFile.password));
+        } else {
+          dialog();
+        }
+      } else {
+        ref.read(AuthService.isLoading.notifier).state = true;
+        token = await InstallIdManager.getInstallId();
+        final body = {'phone': phone, 'code': code, 'token': token};
+        AuthService.submit(ref, body);
+      }
     }
   }
+
+  Future dialog() => Get.dialog(
+        AlertDialog(
+          title: Text('Alert!'),
+          content:
+              Text('Please turn off mobile data and turn on wifi to continue!'),
+          actions: [
+            FilledButton(
+              onPressed: () {
+                Get.back();
+              },
+              style: FilledButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Text('Close'),
+            ),
+          ],
+        ),
+      );
 
   TextFormField field({
     String? hint,
@@ -69,12 +111,62 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     ),
   );
 
+  Widget schoolCard(SchoolData sd) {
+    return InkWell(
+      onTap: () async {
+        final wifi = await InternetChecker.isWifi();
+        if (wifi) {
+          ref.read(BaseFile.ip.notifier).state = sd.ip;
+          ref.read(BaseFile.port.notifier).state = sd.port;
+          ref.read(BaseFile.username.notifier).state = sd.username;
+          ref.read(BaseFile.password.notifier).state = sd.password;
+          ref.read(AuthService.canSelectSchool.notifier).state = false;
+          await AuthService.saveSchool(sd);
+          await WifiService.connectToWifi(sd.username, sd.password);
+        } else {
+          dialog();
+        }
+      },
+      splashColor: Colors.white,
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(8),
+        margin: EdgeInsets.symmetric(vertical: 4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6),
+          color: Colors.white24,
+        ),
+        child: Text(
+          sd.school,
+          style: TextStyle(color: Colors.white, fontSize: 16),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(AuthService.isLoading);
+    final canselect = ref.watch(AuthService.canSelectSchool);
+    final size = MediaQuery.of(context).size;
+    final schoolList = ref.watch(AuthService.schoolList);
+
+    final dec = BoxDecoration(
+      borderRadius: BorderRadius.circular(15),
+      gradient: LinearGradient(
+        colors: [baseColor, baseColor, Colors.lightBlueAccent],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      boxShadow: [
+        BoxShadow(blurRadius: 4, spreadRadius: 1, color: Colors.grey)
+      ],
+    );
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login to Continue'),
+        title: Text('${canselect ? 'Select' : 'Login'} to Continue'),
         centerTitle: true,
         backgroundColor: baseColor,
         foregroundColor: Colors.white,
@@ -92,90 +184,110 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         child: Center(
           child: SingleChildScrollView(
             padding: EdgeInsets.all(20),
-            child: Stack(
-              children: [
-                Container(
-                  margin: EdgeInsets.only(top: 40),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    gradient: LinearGradient(
-                      colors: [baseColor, baseColor, Colors.lightBlueAccent],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                          blurRadius: 4, spreadRadius: 1, color: Colors.grey)
-                    ],
-                  ),
-                  padding: EdgeInsets.all(20),
-                  child: Form(
-                    key: _key,
+            child: canselect
+                ? Container(
+                    decoration: dec,
+                    padding: EdgeInsets.all(20),
+                    constraints: BoxConstraints(maxHeight: size.height * 0.8),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        SizedBox(height: 30),
-                        Text(
-                          'Welcome Back!',
-                          style: TextStyle(
-                            fontSize: 20,
+                        ListTile(
+                          leading: Icon(
+                            Icons.school,
                             color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                            size: 30,
                           ),
-                        ),
-                        SizedBox(height: 20),
-                        field(
-                          hint: 'Phone',
-                          icon: Icons.phone,
-                          type: TextInputType.phone,
-                          onChanged: (p0) {
-                            phone = p0;
-                          },
-                        ),
-                        SizedBox(height: 10),
-                        field(
-                            hint: 'Staff Code',
-                            onChanged: (p0) {
-                              code = p0;
-                            },
-                            icon: Icons.person_pin_rounded),
-                        SizedBox(height: 10),
-                        SizedBox(height: 10),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: () => isLoading ? null : submit(),
-                            style: style,
-                            icon: isLoading
-                                ? SizedBox(
-                                    height: 15,
-                                    width: 15,
-                                    child: CircularProgressIndicator(
-                                        strokeWidth: 2),
-                                  )
-                                : null,
-                            label: Text(isLoading ? 'Logging In...' : 'Login'),
+                          dense: true,
+                          contentPadding: EdgeInsets.symmetric(horizontal: 0),
+                          title: Text(
+                            'Choose your location',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         SizedBox(height: 10),
+                        for (var item in schoolList) schoolCard(item),
                       ],
                     ),
+                  )
+                : Stack(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(top: 40),
+                        decoration: dec,
+                        padding: EdgeInsets.all(20),
+                        child: Form(
+                          key: _key,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(height: 30),
+                              Text(
+                                'Welcome Back!',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 20),
+                              field(
+                                hint: 'Phone',
+                                icon: Icons.phone,
+                                type: TextInputType.phone,
+                                onChanged: (p0) {
+                                  phone = p0;
+                                },
+                              ),
+                              SizedBox(height: 10),
+                              field(
+                                  hint: 'Staff Code',
+                                  onChanged: (p0) {
+                                    code = p0;
+                                  },
+                                  icon: Icons.person_pin_rounded),
+                              SizedBox(height: 10),
+                              SizedBox(height: 10),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed: () => isLoading ? null : submit(),
+                                  style: style,
+                                  icon: isLoading
+                                      ? SizedBox(
+                                          height: 15,
+                                          width: 15,
+                                          child: CircularProgressIndicator(
+                                              strokeWidth: 2),
+                                        )
+                                      : null,
+                                  label: Text(
+                                      isLoading ? 'Logging In...' : 'Login'),
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.topCenter,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: CircleAvatar(
+                            radius: 40,
+                            backgroundImage: AssetImage('assets/logo.png'),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    child: CircleAvatar(
-                      radius: 40,
-                      backgroundImage: AssetImage('assets/logo.png'),
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ),

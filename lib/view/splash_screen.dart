@@ -1,18 +1,20 @@
 import 'package:attendance/main.dart';
 import 'package:attendance/view/auth_screen.dart';
 import 'package:attendance/view/biometric_screen.dart';
+import 'package:attendance/view_model/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     load();
@@ -22,10 +24,16 @@ class _SplashScreenState extends State<SplashScreen> {
   void load() async {
     Widget screen = AuthScreen();
     await Future.delayed(Duration(seconds: 2), () async {
+      await AuthService.checkSelectionStatus(ref);
       SharedPreferences preferences = await SharedPreferences.getInstance();
       final user = preferences.getString('user');
       if (user != null) {
         screen = BiometricScreen();
+      } else {
+        final canDo = ref.read(AuthService.canSelectSchool);
+        if (canDo) {
+          await AuthService.loadSchools(ref);
+        }
       }
     });
     Get.off(

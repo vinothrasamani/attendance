@@ -28,8 +28,10 @@ class HomeService {
     final user = ref.read(userProvider);
 
     try {
+      final ip = ref.read(BaseFile.ip);
+      final port = ref.read(BaseFile.port);
       final res = await BaseFile.getMethod(
-          'fetch-attendance?code=${user?.staffCode}&day=$day');
+          'fetch-attendance?code=${user?.staffCode}&day=$day', ip, port);
       final data = attendanceModelFromJson(res);
       if (data.success) {
         ref.read(list.notifier).state = data.data;
@@ -69,11 +71,12 @@ class HomeService {
   }
 
   static Future<void> fetchStatus(WidgetRef ref) async {
+    final ip = ref.read(BaseFile.ip);
+    final port = ref.read(BaseFile.port);
     final user = ref.read(userProvider);
     final SharedPreferences preferences = await SharedPreferences.getInstance();
     final res = await BaseFile.getMethod(
-      'fetch-status?code=${user?.staffCode}&day=${DateTime.now()}',
-    );
+        'fetch-status?code=${user?.staffCode}&day=${DateTime.now()}', ip, port);
     final data = jsonDecode(res);
     if (data["success"]) {
       if (!data['data']['user']) {
@@ -94,8 +97,10 @@ class HomeService {
 
   static Future<bool> addStatus(WidgetRef ref, bool b) async {
     final user = ref.read(userProvider);
-    final res =
-        await BaseFile.postMethod('check-status', {'userId': user?.oid});
+    final ip = ref.read(BaseFile.ip);
+    final port = ref.read(BaseFile.port);
+    final res = await BaseFile.postMethod(
+        'check-status', {'userId': user?.oid}, ip, port);
     final data = jsonDecode(res);
     if (data['success']) {
       ref.read(current.notifier).state = b;

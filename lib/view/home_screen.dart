@@ -3,6 +3,7 @@ import 'package:attendance/main.dart';
 import 'package:attendance/model/user_model.dart';
 import 'package:attendance/view_model/home_service.dart';
 import 'package:attendance/view_model/user_sevice.dart';
+import 'package:attendance/view_model/wifi_service.dart';
 import 'package:attendance/widget/attendance.dart';
 import 'package:attendance/widget/status.dart';
 import 'package:flutter/material.dart';
@@ -29,8 +30,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void load() async {
-    final ip = BaseFile.ip;
-    final port = BaseFile.port;
+    final ip = ref.read(BaseFile.ip);
+    final port = ref.read(BaseFile.port);
     await ref.read(userProvider.notifier).loadUser().then((_) async {
       ref.read(HomeService.isChecking.notifier).state = true;
       await HomeService.isServerReachable(ip, port).then((val) async {
@@ -57,6 +58,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    WifiService().dispose();
+    super.dispose();
   }
 
   @override

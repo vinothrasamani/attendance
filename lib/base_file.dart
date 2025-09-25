@@ -1,15 +1,20 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
 class BaseFile {
-  static String ip = '192.168.1.112';
-  static int port = 8010;
-  static String baseUrl = 'http://$ip:$port/api';
+  static final ip = StateProvider<String>((ref) => '');
+  static final port = StateProvider<int>((ref) => 0000);
+  static final username = StateProvider<String>((ref) => '');
+  static final password = StateProvider<String>((ref) => '');
+  static String baseNetworkUrl = 'https://attendance.ijessi.com/api';
 
-  static Future<dynamic> postMethod(String endpoint, Object object) async {
+  static Future<dynamic> postMethod(
+      String endpoint, Object object, String ip, int port) async {
     try {
+      String baseUrl = 'http://$ip:$port/api';
       final url = Uri.parse('$baseUrl/$endpoint');
       final res = await http.post(url, body: jsonEncode(object), headers: {
         'Accept': 'application/json',
@@ -30,8 +35,9 @@ class BaseFile {
     }
   }
 
-  static Future<dynamic> getMethod(String endpoint) async {
+  static Future<dynamic> getMethod(String endpoint, String ip, int port) async {
     try {
+      String baseUrl = 'http://$ip:$port/api';
       final url = Uri.parse('$baseUrl/$endpoint');
       final res = await http.get(url, headers: {
         'Accept': 'application/json',

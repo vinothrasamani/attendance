@@ -1,5 +1,7 @@
 import 'package:attendance/view/auth_screen.dart';
 import 'package:attendance/view_model/auth_service.dart';
+import 'package:attendance/view_model/internet_checker.dart';
+import 'package:attendance/view_model/wifi_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
@@ -14,11 +16,41 @@ class BiometricScreen extends ConsumerStatefulWidget {
 class _BiometricScreenState extends ConsumerState<BiometricScreen> {
   @override
   void initState() {
-    initiate();
+    load();
     super.initState();
   }
 
+  void load() async {
+    final wifi = await InternetChecker.isWifi();
+    if (wifi) {
+      initiate();
+    } else {
+      Get.dialog(
+        AlertDialog(
+          title: Text('Alert'),
+          content: Text(
+              'This app only works on wifi so please turn off mobile data and turn on wifi to continue!'),
+          actions: [
+            FilledButton(
+              onPressed: () {
+                Get.back();
+                load();
+              },
+              style: FilledButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
   void initiate() async {
+    await WifiService.requestPermissions();
     AuthService.isBiomatricSupported().then((isSupported) async {
       if (isSupported) {
         final canDo = await AuthService.checkBiometrics();
@@ -69,7 +101,7 @@ class _BiometricScreenState extends ConsumerState<BiometricScreen> {
                         padding: EdgeInsets.symmetric(horizontal: 20),
                         child: OutlinedButton(
                           onPressed: () {
-                            initiate();
+                            load();
                           },
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.white,

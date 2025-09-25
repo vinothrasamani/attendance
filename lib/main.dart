@@ -1,5 +1,6 @@
 import 'package:attendance/install_id_manager.dart';
 import 'package:attendance/view/splash_screen.dart';
+import 'package:attendance/view_model/wifi_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  WifiService().init();
   await InstallIdManager.getInstallId();
   SystemChrome.setPreferredOrientations(
     [DeviceOrientation.portraitDown, DeviceOrientation.portraitUp],
