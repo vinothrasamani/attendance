@@ -30,13 +30,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   void submit() async {
     if (_key.currentState!.validate()) {
+      ref.read(AuthService.isLoading.notifier).state = true;
       if (!ref.read(AuthService.canSelectSchool)) {
         await WifiService.connectToWifi(
           ref.read(BaseFile.username),
           ref.read(BaseFile.password),
         );
       }
-      ref.read(AuthService.isLoading.notifier).state = true;
       token = await InstallIdManager.getInstallId();
       final body = {'phone': phone, 'code': code, 'token': token};
       AuthService.submit(ref, body);

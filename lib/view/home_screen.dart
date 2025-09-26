@@ -31,6 +31,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void load() async {
+    await WifiService.connectToWifi(
+        ref.read(BaseFile.username), ref.read(BaseFile.password));
     final ip = ref.read(BaseFile.ip);
     final port = ref.read(BaseFile.port);
     await ref.read(userProvider.notifier).loadUser();
@@ -40,6 +42,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(HomeService.isOk.notifier).state = val;
       if (val) {
         await HomeService.fetchStatus(ref);
+      } else {
+        await AuthService.refreshSchool(ref);
       }
     } catch (e) {
       debugPrint('Error in load: $e');
@@ -179,13 +183,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   ),
                                   SizedBox(height: 10),
                                   ElevatedButton(
-                                    onPressed: () async {
-                                      await WifiService.connectToWifi(
-                                        ref.read(BaseFile.username),
-                                        ref.read(BaseFile.password),
-                                      );
-                                      load();
-                                    },
+                                    onPressed: () => load,
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: baseColor,
                                       foregroundColor: Colors.white,
