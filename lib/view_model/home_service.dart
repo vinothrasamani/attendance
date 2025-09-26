@@ -27,11 +27,20 @@ class HomeService {
     ref.read(isLoading.notifier).state = true;
     final user = ref.read(userProvider);
 
+    if (user == null) {
+      ref.read(isLoading.notifier).state = false;
+      return;
+    }
+
     try {
       final ip = ref.read(BaseFile.ip);
       final port = ref.read(BaseFile.port);
+      final formattedDay =
+          "${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}";
       final res = await BaseFile.getMethod(
-          'fetch-attendance?code=${user?.staffCode}&day=$day', ip, port);
+          'fetch-attendance?code=${user.staffCode}&day=$formattedDay',
+          ip,
+          port);
       final data = attendanceModelFromJson(res);
       if (data.success) {
         ref.read(list.notifier).state = data.data;
@@ -41,26 +50,30 @@ class HomeService {
           newAttendanceData[DateTime.utc(
               item.date.year, item.date.month, item.date.day)] = status;
         }
-        final a = ref.read(attendanceData.notifier).state;
-        a.clear();
-        a.addAll(newAttendanceData);
-        ref.read(isLoading.notifier).state = false;
-      } else {
-        ref.read(isLoading.notifier).state = false;
+
+        ref.read(attendanceData.notifier).state = newAttendanceData;
       }
     } catch (e) {
+      debugPrint('Error fetching attendance: $e');
+    } finally {
       ref.read(isLoading.notifier).state = false;
     }
   }
 
   static String _calculateAttendanceStatus(AttendanceData item) {
-    if (item.inTime != null && item.outTime == null) {
+    if (item.inTime == null) {
+      return "Absent";
+    }
+
+    if (item.outTime == null || item.outTime?.year == 1900) {
       return "In Complete";
     }
+
     final start = item.inTime!;
     final end = item.outTime!;
     final durationInMinutes = end.difference(start).inMinutes;
     final durationInHours = durationInMinutes / 60;
+
     if (durationInHours >= 8) {
       return "Present";
     } else if (durationInHours >= 4) {
@@ -127,8 +140,8 @@ class HomeService {
 
   static Future<bool> isServerReachable(String ip, int port) async {
     try {
-      final socket =
-          await Socket.connect(ip, port, timeout: const Duration(seconds: 3));
+      final socket = await Socket.connect(ip.trim(), port,
+          timeout: const Duration(seconds: 3));
       socket.destroy();
       return true;
     } catch (e) {

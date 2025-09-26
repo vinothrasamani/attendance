@@ -134,9 +134,25 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('${canselect ? 'Select' : 'Login'} to Continue'),
-        centerTitle: true,
+        centerTitle: canselect ? true : false,
         backgroundColor: baseColor,
         foregroundColor: Colors.white,
+        actions: [
+          if (!canselect)
+            ref.watch(AuthService.refreshing)
+                ? SizedBox(
+                    height: 15,
+                    width: 15,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: Colors.white,
+                    ),
+                  )
+                : IconButton(
+                    onPressed: () => AuthService.refreshSchool(ref),
+                    icon: Icon(Icons.cloud_sync),
+                  ),
+        ],
       ),
       bottomNavigationBar: Container(
         padding: EdgeInsets.all(15),
@@ -220,22 +236,21 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                               SizedBox(height: 10),
                               SizedBox(height: 10),
                               SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton.icon(
-                                  onPressed: () => isLoading ? null : submit(),
-                                  style: style,
-                                  icon: isLoading
-                                      ? SizedBox(
-                                          height: 15,
-                                          width: 15,
-                                          child: CircularProgressIndicator(
-                                              strokeWidth: 2),
-                                        )
-                                      : null,
-                                  label: Text(
-                                      isLoading ? 'Logging In...' : 'Login'),
-                                ),
-                              ),
+                                  width: double.infinity,
+                                  child: ElevatedButton.icon(
+                                    onPressed: isLoading ? null : submit,
+                                    style: style,
+                                    icon: isLoading
+                                        ? SizedBox(
+                                            height: 15,
+                                            width: 15,
+                                            child: CircularProgressIndicator(
+                                                strokeWidth: 2),
+                                          )
+                                        : null,
+                                    label: Text(
+                                        isLoading ? 'Logging In...' : 'Login'),
+                                  )),
                               SizedBox(height: 10),
                             ],
                           ),

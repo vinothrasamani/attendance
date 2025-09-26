@@ -22,20 +22,20 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   }
 
   void load() async {
-    Widget screen = AuthScreen();
-    await Future.delayed(Duration(seconds: 2), () async {
-      await AuthService.checkSelectionStatus(ref);
-      SharedPreferences preferences = await SharedPreferences.getInstance();
-      final user = preferences.getString('user');
-      if (user != null) {
-        screen = BiometricScreen();
-      } else {
-        final canDo = ref.read(AuthService.canSelectSchool);
-        if (canDo) {
-          await AuthService.loadSchools(ref);
-        }
+    await Future.delayed(Duration(seconds: 1));
+    await AuthService.checkSelectionStatus(ref);
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    final user = preferences.getString('user');
+    Widget screen;
+    if (user != null) {
+      screen = BiometricScreen();
+    } else {
+      final canDo = ref.read(AuthService.canSelectSchool);
+      if (canDo) {
+        await AuthService.loadSchools(ref);
       }
-    });
+      screen = AuthScreen();
+    }
     Get.off(
       () => screen,
       transition: Transition.fade,

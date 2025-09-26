@@ -32,16 +32,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void load() async {
     final ip = ref.read(BaseFile.ip);
     final port = ref.read(BaseFile.port);
-    await ref.read(userProvider.notifier).loadUser().then((_) async {
-      ref.read(HomeService.isChecking.notifier).state = true;
-      await HomeService.isServerReachable(ip, port).then((val) async {
-        ref.read(HomeService.isChecking.notifier).state = false;
-        ref.read(HomeService.isOk.notifier).state = val;
-        if (val) {
-          await HomeService.fetchStatus(ref);
-        }
-      });
-    });
+    await ref.read(userProvider.notifier).loadUser();
+    ref.read(HomeService.isChecking.notifier).state = true;
+    try {
+      final val = await HomeService.isServerReachable(ip, port);
+      ref.read(HomeService.isOk.notifier).state = val;
+      if (val) {
+        await HomeService.fetchStatus(ref);
+      }
+    } catch (e) {
+      debugPrint('Error in load: $e');
+      ref.read(HomeService.isOk.notifier).state = false;
+    } finally {
+      ref.read(HomeService.isChecking.notifier).state = false;
+    }
   }
 
   Widget btn(String title, bool isIt, IconData icon, VoidCallback ontap) {

@@ -24,23 +24,32 @@ class _BiometricScreenState extends ConsumerState<BiometricScreen> {
     await WifiService.requestPermissions();
     await WifiService.connectToWifi(
         ref.read(BaseFile.username), ref.read(BaseFile.password));
-    AuthService.isBiomatricSupported().then((isSupported) async {
-      if (isSupported) {
-        final canDo = await AuthService.checkBiometrics();
-        if (canDo) {
-          await AuthService.authendicate();
-        }
+
+    final isSupported = await AuthService.isBiomatricSupported();
+    if (isSupported) {
+      final canDo = await AuthService.checkBiometrics();
+      if (canDo) {
+        await AuthService.authendicate();
       } else {
         Get.off(() => AuthScreen(), transition: Transition.rightToLeft);
         Get.snackbar(
-          'Not Supported!',
-          'Device doesn\'t support local authentications!',
+          'Biometrics Unavailable!',
+          'Please use the login form to continue.',
           borderRadius: 5,
-          backgroundColor: Colors.redAccent,
+          backgroundColor: Colors.orange,
           colorText: Colors.white,
         );
       }
-    });
+    } else {
+      Get.off(() => AuthScreen(), transition: Transition.rightToLeft);
+      Get.snackbar(
+        'Not Supported!',
+        'Device doesn\'t support local authentications!',
+        borderRadius: 5,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
+    }
   }
 
   @override

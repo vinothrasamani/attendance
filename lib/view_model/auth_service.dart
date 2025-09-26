@@ -4,6 +4,7 @@ import 'package:attendance/model/school_model.dart';
 import 'package:attendance/model/user_model.dart';
 import 'package:attendance/view/home_screen.dart';
 import 'package:attendance/view_model/home_service.dart';
+import 'package:attendance/view_model/wifi_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth_android/local_auth_android.dart';
@@ -17,6 +18,7 @@ import 'package:http/http.dart' as http;
 
 class AuthService {
   static final isLoading = StateProvider<bool>((ref) => false);
+  static final refreshing = StateProvider<bool>((ref) => false);
   static final canSelectSchool = StateProvider<bool>((ref) => false);
   static final schoolList = StateProvider<List<SchoolData>>((ref) => []);
 
@@ -41,16 +43,53 @@ class AuthService {
   }
 
   static Future<void> loadSchools(WidgetRef ref) async {
-    final url = Uri.parse('${BaseFile.baseNetworkUrl}/schools');
-    final res = await http.get(url, headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    });
-    if (res.statusCode == 200) {
-      final data = schoolModelFromJson(res.body);
-      if (data.success) {
-        ref.read(schoolList.notifier).state = data.data;
+    try {
+      final url = Uri.parse('${BaseFile.baseNetworkUrl}/schools');
+      final res = await http.get(url, headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      });
+      if (res.statusCode == 200) {
+        final data = schoolModelFromJson(res.body);
+        if (data.success) {
+          ref.read(schoolList.notifier).state = data.data;
+        }
       }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  static Future refreshSchool(WidgetRef ref) async {
+    try {
+      ref.read(refreshing.notifier).state = true;
+      final SharedPreferences preferences =
+          await SharedPreferences.getInstance();
+      final school = preferences.getString('school');
+      if (school != null) {
+        final id = jsonDecode(school)['id'];
+        final url = Uri.parse('${BaseFile.baseNetworkUrl}/fetch-school?id=$id');
+        final res = await http.get(url, headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        });
+        if (res.statusCode == 200) {
+          final data = jsonDecode(res.body);
+          if (data['success']) {
+            final info = SchoolData.fromJson(data['data']);
+            preferences.setString('school', jsonEncode(data['data']));
+            ref.read(BaseFile.ip.notifier).state = info.ip;
+            ref.read(BaseFile.port.notifier).state = info.port;
+            ref.read(BaseFile.username.notifier).state = info.username;
+            ref.read(BaseFile.password.notifier).state = info.password;
+            await WifiService.connectToWifi(info.username, info.password);
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      ref.read(refreshing.notifier).state = false;
     }
   }
 
@@ -102,7 +141,7 @@ class AuthService {
   static void submit(WidgetRef ref, Object object) async {
     final ip = ref.read(BaseFile.ip);
     final port = ref.read(BaseFile.port);
-    final done = await HomeService.isServerReachable(ip.trim(), port);
+    final done = await HomeService.isServerReachable(ip, port);
     if (!done) {
       Get.snackbar(
         'Network Unavailable!',
