@@ -263,7 +263,7 @@ class _AttendanceState extends ConsumerState<Attendance> {
                           ),
                           SizedBox(height: 6),
                           Text(
-                            'Check out : ${info == null || info.outTime == null ? '00:00 AM' : DateFormat('hh:mm a').format(info.outTime!)}',
+                            'Check out : ${info == null || info.outTime == null || info.outTime?.year == 1900 ? '00:00 AM' : DateFormat('hh:mm a').format(info.outTime!)}',
                           ),
                         ],
                       ),

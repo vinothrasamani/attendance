@@ -4,6 +4,7 @@ import 'package:attendance/view_model/home_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 class Status extends ConsumerWidget {
   const Status({super.key});
@@ -13,6 +14,22 @@ class Status extends ConsumerWidget {
     final Size size = MediaQuery.of(context).size;
     final clr1 = Colors.green;
     final clr2 = Colors.red[800]!;
+    final shift = ref.watch(HomeService.shift);
+
+    Widget shiftChip(DateTime time, Color color) {
+      return Container(
+        padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: color.withAlpha(80)),
+          color: color.withAlpha(30),
+        ),
+        child: Text(
+          DateFormat('hh : mm a').format(time),
+          style: TextStyle(color: color),
+        ),
+      );
+    }
 
     return SingleChildScrollView(
       child: Container(
@@ -100,6 +117,19 @@ class Status extends ConsumerWidget {
                   ),
                 ),
               ),
+              SizedBox(height: 15),
+              if (shift != null)
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    shiftChip(shift.startTime, clr1),
+                    SizedBox(width: 4),
+                    Icon(Icons.arrow_forward, size: 16),
+                    SizedBox(width: 4),
+                    shiftChip(shift.endTime, clr2),
+                  ],
+                ),
             ],
           ),
         ),

@@ -1,12 +1,15 @@
+import 'dart:convert';
+
+import 'package:attendance/model/school_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wifi_iot/wifi_iot.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class WifiService with WidgetsBindingObserver {
   static const platform = MethodChannel("wifi_channel");
-
   void init() {
     WidgetsBinding.instance.addObserver(this);
   }
@@ -16,13 +19,30 @@ class WifiService with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.detached ||
-        state == AppLifecycleState.inactive) {
-      debugPrint('Connection terminated');
-      // WiFiForIoTPlugin.disconnect();
-    } else if (state == AppLifecycleState.resumed) {
-      // WifiService.connectToWifi('Airtel_jega_8033', 'air12347');
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.resumed) {
+      debugPrint('App resumed → Reconnecting Wi-Fi');
+      final SharedPreferences preferences =
+          await SharedPreferences.getInstance();
+      final school = preferences.getString('school');
+      if (school != null) {
+        final data = SchoolData.fromJson(jsonDecode(school));
+        await connectToWifi(data.username, data.password);
+      } else {
+        debugPrint('Connection failed!');
+      }
+    } else if (state == AppLifecycleState.detached) {
+      debugPrint('App terminated → Disconnecting Wi-Fi');
+      await WiFiForIoTPlugin.disconnect();
+    } else if (state == AppLifecycleState.paused) {
+      Future.delayed(const Duration(seconds: 20), () async {
+        final isForeground =
+            WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+        if (!isForeground) {
+          debugPrint('App in background → Disconnecting Wi-Fi');
+          await WiFiForIoTPlugin.disconnect();
+        }
+      });
     }
   }
 

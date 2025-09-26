@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:attendance/base_file.dart';
 import 'package:attendance/model/attendance_model.dart';
+import 'package:attendance/model/status_model.dart';
 import 'package:attendance/view/auth_screen.dart';
 import 'package:attendance/view_model/user_sevice.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class HomeService {
   static final selectedDay = StateProvider<DateTime?>((ref) => null);
   static final attendanceData =
       StateProvider<Map<DateTime, String>>((ref) => {});
+  static final shift = StateProvider<Todayshift?>((ref) => null);
   static final list = StateProvider<List<AttendanceData>>((ref) => []);
 
   static Future<void> fetchAttendance(WidgetRef ref, DateTime day) async {
@@ -90,9 +92,9 @@ class HomeService {
     final SharedPreferences preferences = await SharedPreferences.getInstance();
     final res = await BaseFile.getMethod(
         'fetch-status?code=${user?.staffCode}&day=${DateTime.now()}', ip, port);
-    final data = jsonDecode(res);
-    if (data["success"]) {
-      if (!data['data']['user']) {
+    final data = statusModelFromJson(res);
+    if (data.success) {
+      if (!data.data.user) {
         await preferences.remove('user');
         Get.offAll(() => AuthScreen(), transition: Transition.leftToRight);
         Get.snackbar(
@@ -102,9 +104,11 @@ class HomeService {
           backgroundColor: Colors.redAccent,
           colorText: Colors.white,
         );
+        return;
       }
-      final len = data['data']['count'];
+      final len = data.data.count;
       ref.read(current.notifier).state = len == 0 || len > 1 ? false : true;
+      ref.read(shift.notifier).state = data.data.todayshift;
     }
   }
 

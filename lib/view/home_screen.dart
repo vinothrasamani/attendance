@@ -1,6 +1,7 @@
 import 'package:attendance/base_file.dart';
 import 'package:attendance/main.dart';
 import 'package:attendance/model/user_model.dart';
+import 'package:attendance/view_model/auth_service.dart';
 import 'package:attendance/view_model/home_service.dart';
 import 'package:attendance/view_model/user_sevice.dart';
 import 'package:attendance/view_model/wifi_service.dart';
@@ -64,6 +65,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  void menu(int index) async {
+    switch (index) {
+      case 1:
+        SharedPreferences preferences = await SharedPreferences.getInstance();
+        preferences.setBool('darkTheme', !Get.isDarkMode);
+        Get.changeThemeMode(
+          Get.isDarkMode ? ThemeMode.light : ThemeMode.dark,
+        );
+        break;
+      case 2:
+        await AuthService.refreshSchool(ref);
+        break;
+      default:
+    }
+  }
+
+  PopupMenuItem<int> menuItem(int i, String title, IconData icon) {
+    return PopupMenuItem(
+      value: i,
+      child: Row(
+        children: [
+          Icon(icon),
+          SizedBox(width: 6),
+          Text(title),
+        ],
+      ),
+    );
+  }
+
   @override
   void dispose() {
     WifiService().dispose();
@@ -92,28 +122,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   dense: true,
                   contentPadding:
                       EdgeInsets.symmetric(vertical: 0, horizontal: 0),
-                  leading: GestureDetector(
-                    onDoubleTap: () async {
-                      SharedPreferences preferences =
-                          await SharedPreferences.getInstance();
-                      preferences.setBool('darkTheme', !Get.isDarkMode);
-                      Get.changeThemeMode(
-                          Get.isDarkMode ? ThemeMode.light : ThemeMode.dark);
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 6),
-                      child: Icon(Icons.account_circle,
-                          size: 40, color: Colors.white),
-                    ),
+                  leading: Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: Icon(Icons.account_circle,
+                        size: 40, color: Colors.white),
                   ),
                   title: Text(
                     'Welcome ${user != null ? '${user!.firstName} ${user!.middleName ?? ''} ${user!.lastName ?? ''}' : 'User'}',
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(color: Colors.white, fontSize: 18),
                   ),
-                  trailing: IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.message, color: Colors.white),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      PopupMenuButton<int>(
+                        iconColor: Colors.white,
+                        position: PopupMenuPosition.under,
+                        onSelected: menu,
+                        itemBuilder: (ctx) => [
+                          menuItem(1, 'Theme', Icons.brightness_4),
+                          menuItem(2, 'Cloud Sync', Icons.cloud_sync),
+                          menuItem(3, 'Notice', Icons.message),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
