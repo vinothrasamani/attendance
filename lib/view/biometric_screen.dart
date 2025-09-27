@@ -24,7 +24,6 @@ class _BiometricScreenState extends ConsumerState<BiometricScreen> {
     await WifiService.requestPermissions();
     await WifiService.connectToWifi(
         ref.read(BaseFile.username), ref.read(BaseFile.password));
-
     final isSupported = await AuthService.isBiomatricSupported();
     if (isSupported) {
       final canDo = await AuthService.checkBiometrics();

@@ -2,6 +2,7 @@ import 'package:attendance/main.dart';
 import 'package:attendance/view/auth_screen.dart';
 import 'package:attendance/view/biometric_screen.dart';
 import 'package:attendance/view_model/auth_service.dart';
+import 'package:attendance/view_model/wifi_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
@@ -24,6 +25,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   void load() async {
     await Future.delayed(Duration(seconds: 1));
     await AuthService.checkSelectionStatus(ref);
+    await WifiService.checkLocationStatus();
     SharedPreferences preferences = await SharedPreferences.getInstance();
     final user = preferences.getString('user');
     Widget screen;

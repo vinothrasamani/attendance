@@ -16,6 +16,7 @@ class HomeService {
   static final isLoading = StateProvider<bool>((ref) => false);
   static final isChecking = StateProvider<bool>((ref) => false);
   static final isOk = StateProvider<bool>((ref) => false);
+  static final err = StateProvider<bool>((ref) => false);
   static final current = StateProvider<bool>((ref) => false);
   static final index = StateProvider<int>((ref) => 0);
   static final focusedDay = StateProvider<DateTime>((ref) => DateTime.now());

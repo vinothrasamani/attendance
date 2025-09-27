@@ -31,13 +31,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void load() async {
-    await WifiService.connectToWifi(
-        ref.read(BaseFile.username), ref.read(BaseFile.password));
-    final ip = ref.read(BaseFile.ip);
-    final port = ref.read(BaseFile.port);
-    await ref.read(userProvider.notifier).loadUser();
-    ref.read(HomeService.isChecking.notifier).state = true;
     try {
+      ref.read(HomeService.err.notifier).state = false;
+      ref.read(HomeService.isChecking.notifier).state = true;
+      await WifiService.connectToWifi(
+          ref.read(BaseFile.username), ref.read(BaseFile.password));
+      final ip = ref.read(BaseFile.ip);
+      final port = ref.read(BaseFile.port);
+      await ref.read(userProvider.notifier).loadUser();
       final val = await HomeService.isServerReachable(ip, port);
       ref.read(HomeService.isOk.notifier).state = val;
       if (val) {
@@ -47,6 +48,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
     } catch (e) {
       debugPrint('Error in load: $e');
+      ref.read(HomeService.err.notifier).state = true;
       ref.read(HomeService.isOk.notifier).state = false;
     } finally {
       ref.read(HomeService.isChecking.notifier).state = false;
@@ -110,6 +112,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final index = ref.watch(HomeService.index);
     final isOk = ref.watch(HomeService.isOk);
 
+    final c = Colors.red[800]!;
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -157,46 +160,71 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: ref.watch(HomeService.isChecking)
                     ? Center(child: CircularProgressIndicator())
                     : !isOk
-                        ? Center(
-                            child: Container(
-                              padding: EdgeInsets.all(10),
-                              margin: EdgeInsets.symmetric(horizontal: 20),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Builder(builder: (context) {
-                                    final c = Colors.red[800]!;
-                                    return CircleAvatar(
-                                      radius: 35,
-                                      backgroundColor: c.withAlpha(50),
-                                      child: Icon(
-                                        Icons.wifi_off,
-                                        size: 30,
+                        ? ref.watch(HomeService.err)
+                            ? Center(
+                                child: Container(
+                                  padding: EdgeInsets.all(10),
+                                  margin: EdgeInsets.symmetric(horizontal: 20),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: c.withAlpha(80)),
+                                    color: c.withAlpha(10),
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.error_outline,
                                         color: c,
+                                        size: 40,
                                       ),
-                                    );
-                                  }),
-                                  SizedBox(height: 10),
-                                  Text(
-                                    'Couldn\'t reach the server. Please connect with an appropriate wifi!',
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  SizedBox(height: 10),
-                                  ElevatedButton(
-                                    onPressed: () => load,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: baseColor,
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
+                                      SizedBox(height: 10),
+                                      Text(
+                                        'Something went wrong, please contact admin!',
+                                        style: TextStyle(color: c),
                                       ),
-                                    ),
-                                    child: Text('Retry'),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            ),
-                          )
+                                ),
+                              )
+                            : Center(
+                                child: Container(
+                                  padding: EdgeInsets.all(10),
+                                  margin: EdgeInsets.symmetric(horizontal: 20),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 35,
+                                        backgroundColor: c.withAlpha(50),
+                                        child: Icon(
+                                          Icons.wifi_off,
+                                          size: 30,
+                                          color: c,
+                                        ),
+                                      ),
+                                      SizedBox(height: 10),
+                                      Text(
+                                        'Couldn\'t reach the server. Please connect with an appropriate wifi!',
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      SizedBox(height: 10),
+                                      ElevatedButton(
+                                        onPressed: () => load,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: baseColor,
+                                          foregroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                        ),
+                                        child: Text('Retry'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
                         : ref.watch(HomeService.index) == 0
                             ? Status()
                             : Attendance(),
