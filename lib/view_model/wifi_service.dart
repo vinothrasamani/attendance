@@ -133,10 +133,8 @@ class WifiService with WidgetsBindingObserver {
   static Future<bool> bindToWifi() async {
     try {
       await platform.invokeMethod("bindNetwork");
-      debugPrint("Successfully bound app to Wi-Fi network");
       return true;
     } catch (e) {
-      debugPrint("Failed to bind network: $e");
       return false;
     }
   }

@@ -1,6 +1,7 @@
 import 'package:attendance/base_file.dart';
 import 'package:attendance/main.dart';
 import 'package:attendance/model/user_model.dart';
+import 'package:attendance/view/profile_screen.dart';
 import 'package:attendance/view_model/auth_service.dart';
 import 'package:attendance/view_model/home_service.dart';
 import 'package:attendance/view_model/user_sevice.dart';
@@ -131,9 +132,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       EdgeInsets.symmetric(vertical: 0, horizontal: 0),
                   leading: Padding(
                     padding: const EdgeInsets.only(left: 6),
-                    child: Icon(Icons.account_circle,
-                        size: 40, color: Colors.white),
+                    child: CircleAvatar(
+                      backgroundImage: AssetImage('assets/person.png'),
+                    ),
                   ),
+                  onTap: () {
+                    Get.to(() => ProfileScreen(),
+                        transition: Transition.leftToRightWithFade);
+                  },
                   title: Text(
                     'Welcome ${user != null ? '${user!.firstName} ${user!.middleName ?? ''} ${user!.lastName ?? ''}' : 'User'}',
                     overflow: TextOverflow.ellipsis,
@@ -173,11 +179,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(
-                                        Icons.error_outline,
-                                        color: c,
-                                        size: 40,
-                                      ),
+                                      Icon(Icons.error, color: c, size: 40),
                                       SizedBox(height: 10),
                                       Text(
                                         'Something went wrong, please contact admin!',
