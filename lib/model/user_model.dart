@@ -62,8 +62,8 @@ class User {
   final String? otApplicable;
   final String? otRate;
   final String? status;
-  final String companyId;
-  final String branchId;
+  final String? companyId;
+  final String? branchId;
   final String? mobilePhone;
   final String? optimisticLockField;
   final String staffCode;
@@ -139,8 +139,8 @@ class User {
     this.otApplicable,
     this.otRate,
     this.status,
-    required this.companyId,
-    required this.branchId,
+    this.companyId,
+    this.branchId,
     this.mobilePhone,
     this.optimisticLockField,
     required this.staffCode,

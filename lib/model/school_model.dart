@@ -56,8 +56,8 @@ class SchoolData {
         school: json["school"],
         ip: json["ip"],
         port: json["port"],
-        username: json["username"],
-        password: json["password"],
+        username: json["wifi_name"],
+        password: json["wifi_password"],
         createdAt: DateTime.parse(json["created_at"]),
         updatedAt: DateTime.parse(json["updated_at"]),
       );
@@ -67,8 +67,8 @@ class SchoolData {
         "school": school,
         "ip": ip,
         "port": port,
-        "username": username,
-        "password": password,
+        "wifi_name": username,
+        "wifi_password": password,
         "created_at": createdAt.toIso8601String(),
         "updated_at": updatedAt.toIso8601String(),
       };

@@ -144,9 +144,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     height: 15,
                     width: 15,
                     child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: Colors.white,
-                    ),
+                        strokeWidth: 2.5, color: Colors.white),
                   )
                 : IconButton(
                     onPressed: () => AuthService.refreshSchool(ref),
@@ -245,11 +243,19 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                                             height: 15,
                                             width: 15,
                                             child: CircularProgressIndicator(
-                                                strokeWidth: 2),
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
                                           )
                                         : null,
                                     label: Text(
-                                        isLoading ? 'Logging In...' : 'Login'),
+                                      isLoading ? 'Logging In...' : 'Login',
+                                      style: TextStyle(
+                                        color: isLoading
+                                            ? Colors.grey
+                                            : Colors.black,
+                                      ),
+                                    ),
                                   )),
                               SizedBox(height: 10),
                             ],

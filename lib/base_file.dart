@@ -9,7 +9,7 @@ class BaseFile {
   static final port = StateProvider<int>((ref) => 0000);
   static final username = StateProvider<String>((ref) => '');
   static final password = StateProvider<String>((ref) => '');
-  static String baseNetworkUrl = 'https://attendance.ijessi.com/api';
+  static String baseNetworkUrl = 'https://cpanel.ijessi.com/api';
 
   static Future<dynamic> postMethod(
       String endpoint, Object object, String ip, int port) async {

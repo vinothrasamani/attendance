@@ -2,6 +2,7 @@ import 'package:attendance/main.dart';
 import 'package:attendance/model/profile_model.dart';
 import 'package:attendance/view_model/profile_service.dart';
 import 'package:attendance/view_model/user_sevice.dart';
+import 'package:attendance/widget/error_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,11 +13,12 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
     final profile = ref.watch(ProfileService.profile(user?.staffCode));
-    final c = Colors.red[800]!;
     final size = MediaQuery.of(context).size;
 
     Widget info(IconData icon, String title, String val) => ListTile(
           leading: Icon(icon),
+          dense: true,
+          contentPadding: EdgeInsets.all(0),
           title: Text(
             title,
             style: TextStyle(
@@ -43,6 +45,11 @@ class ProfileScreen extends ConsumerWidget {
       );
     }
 
+    void getImage() {
+      final img = user?.photo;
+      print(img);
+    }
+
     return Scaffold(
       appBar: AppBar(title: Text('Profile')),
       body: SafeArea(
@@ -54,7 +61,9 @@ class ProfileScreen extends ConsumerWidget {
               children: [
                 SizedBox(height: 30),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    getImage();
+                  },
                   child: Stack(
                     children: [
                       CircleAvatar(
@@ -91,27 +100,9 @@ class ProfileScreen extends ConsumerWidget {
                   error: (error, _) {
                     return SizedBox(
                       height: size.height * 0.55,
-                      child: Center(
-                        child: Container(
-                          padding: EdgeInsets.all(10),
-                          margin: EdgeInsets.symmetric(horizontal: 20),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: c.withAlpha(80)),
-                            color: c.withAlpha(10),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.error, color: c, size: 40),
-                              SizedBox(height: 10),
-                              Text(
-                                'Unable to load profile, try again later!',
-                                style: TextStyle(color: c),
-                              ),
-                            ],
-                          ),
-                        ),
+                      child: ErrorCard(
+                        icon: Icons.error,
+                        err: 'Unable to load profile, try again later!',
                       ),
                     );
                   },

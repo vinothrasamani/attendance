@@ -7,6 +7,7 @@ import 'package:attendance/view_model/home_service.dart';
 import 'package:attendance/view_model/user_sevice.dart';
 import 'package:attendance/view_model/wifi_service.dart';
 import 'package:attendance/widget/attendance.dart';
+import 'package:attendance/widget/error_card.dart';
 import 'package:attendance/widget/status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -167,28 +168,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ? Center(child: CircularProgressIndicator())
                     : !isOk
                         ? ref.watch(HomeService.err)
-                            ? Center(
-                                child: Container(
-                                  padding: EdgeInsets.all(10),
-                                  margin: EdgeInsets.symmetric(horizontal: 20),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(color: c.withAlpha(80)),
-                                    color: c.withAlpha(10),
-                                  ),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.error, color: c, size: 40),
-                                      SizedBox(height: 10),
-                                      Text(
-                                        'Something went wrong, please contact admin!',
-                                        style: TextStyle(color: c),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              )
+                            ? ErrorCard(
+                                icon: Icons.error,
+                                err:
+                                    'Something went wrong, please contact admin!')
                             : Center(
                                 child: Container(
                                   padding: EdgeInsets.all(10),

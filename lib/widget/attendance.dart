@@ -259,11 +259,11 @@ class _AttendanceState extends ConsumerState<Attendance> {
                           ),
                           SizedBox(height: 15),
                           Text(
-                            'Check In : ${info == null || info.inTime == null ? '00:00 AM' : DateFormat('hh:mm a').format(info.inTime!)}',
+                            'Check In : ${info == null || info.inTime == null ? '-' : DateFormat('hh:mm a').format(info.inTime!)}',
                           ),
                           SizedBox(height: 6),
                           Text(
-                            'Check out : ${info == null || info.outTime == null || info.outTime?.year == 1900 ? '00:00 AM' : DateFormat('hh:mm a').format(info.outTime!)}',
+                            'Check out : ${info == null || info.outTime == null || info.outTime?.year == 1900 ? '-' : DateFormat('hh:mm a').format(info.outTime!)}',
                           ),
                         ],
                       ),
