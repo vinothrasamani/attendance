@@ -95,7 +95,7 @@ class HomeService {
         'fetch-status?code=${user?.staffCode}&day=${DateTime.now()}', ip, port);
     final data = statusModelFromJson(res);
     if (data.success) {
-      if (!data.data.user) {
+      if (data.data.user == null) {
         await preferences.remove('user');
         Get.offAll(() => AuthScreen(), transition: Transition.leftToRight);
         Get.snackbar(
@@ -107,6 +107,10 @@ class HomeService {
         );
         return;
       }
+      preferences.setString('user', jsonEncode(data.data.user));
+      preferences.setString(
+          'profile_image', jsonDecode(res)['data']['user']['photo']);
+      await ref.read(userProvider.notifier).loadUser();
       final len = data.data.count;
       ref.read(current.notifier).state = len == 0 || len > 1 ? false : true;
       ref.read(shift.notifier).state = data.data.todayshift;

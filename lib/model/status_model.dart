@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:attendance/model/user_model.dart';
+
 StatusModel statusModelFromJson(String str) =>
     StatusModel.fromJson(json.decode(str));
 
@@ -32,7 +34,7 @@ class StatusModel {
 class StatusInfo {
   int count;
   Todayshift todayshift;
-  bool user;
+  User? user;
 
   StatusInfo({
     required this.count,
@@ -43,13 +45,13 @@ class StatusInfo {
   factory StatusInfo.fromJson(Map<String, dynamic> json) => StatusInfo(
         count: json["count"],
         todayshift: Todayshift.fromJson(json["todayshift"]),
-        user: json["user"],
+        user: User.fromJson(json['user']),
       );
 
   Map<String, dynamic> toJson() => {
         "count": count,
         "todayshift": todayshift.toJson(),
-        "user": user,
+        "user": user?.toJson(),
       };
 }
 

@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:attendance/main.dart';
 import 'package:attendance/model/profile_model.dart';
 import 'package:attendance/view_model/profile_service.dart';
 import 'package:attendance/view_model/user_sevice.dart';
 import 'package:attendance/widget/error_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -38,16 +42,21 @@ class ProfileScreen extends ConsumerWidget {
           info(Icons.cake, 'Date of Birth',
               p?.dob?.toIso8601String().split('T')[0] ?? '-'),
           info(Icons.badge, 'Date of Joining',
-              p?.doj?.toIso8601String().split(' ')[0] ?? '-'),
+              p?.doj?.toIso8601String().split('T')[0] ?? '-'),
           info(Icons.location_city, 'Permanent Address',
               p?.permenantAddress ?? '-'),
         ],
       );
     }
 
-    void getImage() {
-      final img = user?.photo;
-      print(img);
+    Future<Uint8List> getImage() async {
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      final img = preferences.getString('profile_image');
+      Uint8List? source;
+      if (img != null) {
+        source = base64Decode(img);
+      }
+      return source ?? Uint8List(0);
     }
 
     return Scaffold(
@@ -61,14 +70,24 @@ class ProfileScreen extends ConsumerWidget {
               children: [
                 SizedBox(height: 30),
                 GestureDetector(
-                  onTap: () {
-                    getImage();
-                  },
+                  onTap: () => ProfileService.uploadProfile(),
                   child: Stack(
                     children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundImage: AssetImage('assets/person.png'),
+                      FutureBuilder(
+                        future: getImage(),
+                        builder: (context, snap) {
+                          if (snap.hasData) {
+                            return CircleAvatar(
+                              radius: 50,
+                              backgroundImage: AssetImage('assets/person.png'),
+                              foregroundImage: MemoryImage(snap.data!),
+                            );
+                          }
+                          return CircleAvatar(
+                            radius: 50,
+                            backgroundImage: AssetImage('assets/person.png'),
+                          );
+                        },
                       ),
                       Positioned(
                         bottom: 4,

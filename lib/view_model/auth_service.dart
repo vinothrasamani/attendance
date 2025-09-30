@@ -157,6 +157,8 @@ class AuthService {
       final data = userModelFromJson(res);
       if (data.success) {
         preferences.setString('user', jsonEncode(data.data));
+        preferences.setString(
+            'profile_image', jsonDecode(res)['data']['photo']);
         Get.offAll(() => HomeScreen());
         Get.snackbar(
           'Logged In',
