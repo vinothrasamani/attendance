@@ -20,6 +20,7 @@ class BaseFile {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       });
+      print(res.body);
       if (res.statusCode == 200) {
         return res.body;
       } else {

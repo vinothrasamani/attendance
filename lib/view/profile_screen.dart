@@ -70,7 +70,7 @@ class ProfileScreen extends ConsumerWidget {
               children: [
                 SizedBox(height: 30),
                 GestureDetector(
-                  onTap: () => ProfileService.uploadProfile(),
+                  onTap: () => ProfileService.uploadProfile(ref),
                   child: Stack(
                     children: [
                       FutureBuilder(
