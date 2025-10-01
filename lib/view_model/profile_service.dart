@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:attendance/base_file.dart';
+import 'package:attendance/main.dart';
 import 'package:attendance/model/profile_model.dart';
 import 'package:attendance/view_model/user_sevice.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -50,68 +52,93 @@ class ProfileService {
       if (img != null) {
         final bytes = await img.readAsBytes();
         String base64Image = base64Encode(bytes);
-        final res = await BaseFile.postMethod(
-            'update-image',
-            {
-              'source': 'data:image/jpeg;base64,$base64Image',
-              'code': user?.staffCode
-            },
-            ip,
-            port);
-        if (jsonDecode(res)['success']) {
+        final res = await BaseFile.postMethod('update-image',
+            {'source': base64Image, 'code': user?.staffCode}, ip, port);
+        final data = jsonDecode(res);
+        if (data['success']) {
           SharedPreferences preferences = await SharedPreferences.getInstance();
           await preferences.setString('profile_image', base64Image);
+          Get.snackbar(
+            'Uploaded',
+            data['message'],
+            colorText: Colors.white,
+            backgroundColor: Colors.green,
+            borderRadius: 6,
+          );
         }
       }
     }
   }
 
-  static void uploadProfile(WidgetRef ref) async {
+  static void uploadProfile(WidgetRef ref, Future<Uint8List> imgSrc) async {
     double size = 300;
     await getMediaPermission();
     await Get.dialog(
       AlertDialog(
-        title: Text('Choose your source!'),
-        content: Row(
+        title: Text('Profile Image'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GestureDetector(
-              onTap: () async {
-                Get.back();
-                final image = await ImagePicker().pickImage(
-                  source: ImageSource.camera,
-                  maxHeight: size,
-                  maxWidth: size,
-                );
-                uploadImage(image, ref);
-              },
-              child: SizedBox(
-                width: 60,
-                height: 60,
-                child: Image.asset(
-                  'assets/camera.png',
-                  fit: BoxFit.cover,
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                gradient: LinearGradient(
+                  colors: [baseColor, Colors.lightBlueAccent],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
               ),
+              clipBehavior: Clip.hardEdge,
+              child: Image.memory(await imgSrc),
             ),
-            SizedBox(width: 15),
-            GestureDetector(
-              onTap: () async {
-                Get.back();
-                final image = await ImagePicker().pickImage(
-                  source: ImageSource.gallery,
-                  maxHeight: size,
-                  maxWidth: size,
-                );
-                uploadImage(image, ref);
-              },
-              child: SizedBox(
-                width: 60,
-                height: 60,
-                child: Image.asset(
-                  'assets/gallery.png',
-                  fit: BoxFit.cover,
+            SizedBox(height: 10),
+            Text('Update profile image',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            SizedBox(height: 10),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GestureDetector(
+                  onTap: () async {
+                    Get.back();
+                    final image = await ImagePicker().pickImage(
+                      source: ImageSource.camera,
+                      maxHeight: size,
+                      maxWidth: size,
+                    );
+                    uploadImage(image, ref);
+                  },
+                  child: SizedBox(
+                    width: 60,
+                    height: 60,
+                    child: Image.asset(
+                      'assets/camera.png',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
-              ),
+                SizedBox(width: 15),
+                GestureDetector(
+                  onTap: () async {
+                    Get.back();
+                    final image = await ImagePicker().pickImage(
+                      source: ImageSource.gallery,
+                      maxHeight: size,
+                      maxWidth: size,
+                    );
+                    uploadImage(image, ref);
+                  },
+                  child: SizedBox(
+                    width: 60,
+                    height: 60,
+                    child: Image.asset(
+                      'assets/gallery.png',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
