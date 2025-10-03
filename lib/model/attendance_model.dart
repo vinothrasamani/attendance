@@ -38,6 +38,8 @@ class AttendanceData {
   DateTime date;
   DateTime? inTime;
   DateTime? outTime;
+  String? category;
+  String? name;
 
   AttendanceData({
     required this.employeeCode,
@@ -45,6 +47,8 @@ class AttendanceData {
     required this.date,
     required this.inTime,
     required this.outTime,
+    this.category,
+    this.name,
   });
 
   factory AttendanceData.fromJson(Map<String, dynamic> json) => AttendanceData(
@@ -53,6 +57,8 @@ class AttendanceData {
         date: DateTime.parse(json["Date"]),
         inTime: DateTime.parse(json["InTime"]),
         outTime: DateTime.parse(json["OutTime"]),
+        category: json['Category'],
+        name: json['FirstName'],
       );
 
   Map<String, dynamic> toJson() => {
@@ -62,5 +68,7 @@ class AttendanceData {
             "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}",
         "InTime": inTime?.toIso8601String(),
         "OutTime": outTime?.toIso8601String(),
+        "Category": category,
+        "FirstName": name,
       };
 }

@@ -55,7 +55,8 @@ class ProfileService {
         final data = jsonDecode(res);
         if (data['success']) {
           SharedPreferences preferences = await SharedPreferences.getInstance();
-          await preferences.setString('profile_image', base64Image);
+          await preferences.setString(
+              'profile_image_${user?.staffCode}', base64Image);
           Get.snackbar(
             'Uploaded',
             data['message'],
