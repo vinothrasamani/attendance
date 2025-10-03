@@ -1,11 +1,9 @@
 import 'dart:convert';
 
 import 'package:attendance/base_file.dart';
-import 'package:attendance/main.dart';
 import 'package:attendance/model/profile_model.dart';
 import 'package:attendance/view_model/user_sevice.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -70,75 +68,53 @@ class ProfileService {
     }
   }
 
-  static void uploadProfile(WidgetRef ref, Future<Uint8List> imgSrc) async {
+  static void uploadProfile(WidgetRef ref) async {
     double size = 300;
     await getMediaPermission();
     await Get.dialog(
       AlertDialog(
-        title: Text('Profile Image'),
-        content: Column(
+        title: Text('Update Profile Image', overflow: TextOverflow.ellipsis),
+        content: Row(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                gradient: LinearGradient(
-                  colors: [baseColor, Colors.lightBlueAccent],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+            GestureDetector(
+              onTap: () async {
+                Get.back();
+                final image = await ImagePicker().pickImage(
+                  source: ImageSource.camera,
+                  maxHeight: size,
+                  maxWidth: size,
+                );
+                uploadImage(image, ref);
+              },
+              child: SizedBox(
+                width: 60,
+                height: 60,
+                child: Image.asset(
+                  'assets/camera.png',
+                  fit: BoxFit.cover,
                 ),
               ),
-              clipBehavior: Clip.hardEdge,
-              child: Image.memory(await imgSrc),
             ),
-            SizedBox(height: 10),
-            Text('Update profile image',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                GestureDetector(
-                  onTap: () async {
-                    Get.back();
-                    final image = await ImagePicker().pickImage(
-                      source: ImageSource.camera,
-                      maxHeight: size,
-                      maxWidth: size,
-                    );
-                    uploadImage(image, ref);
-                  },
-                  child: SizedBox(
-                    width: 60,
-                    height: 60,
-                    child: Image.asset(
-                      'assets/camera.png',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+            SizedBox(width: 15),
+            GestureDetector(
+              onTap: () async {
+                Get.back();
+                final image = await ImagePicker().pickImage(
+                  source: ImageSource.gallery,
+                  maxHeight: size,
+                  maxWidth: size,
+                );
+                uploadImage(image, ref);
+              },
+              child: SizedBox(
+                width: 60,
+                height: 60,
+                child: Image.asset(
+                  'assets/gallery.png',
+                  fit: BoxFit.cover,
                 ),
-                SizedBox(width: 15),
-                GestureDetector(
-                  onTap: () async {
-                    Get.back();
-                    final image = await ImagePicker().pickImage(
-                      source: ImageSource.gallery,
-                      maxHeight: size,
-                      maxWidth: size,
-                    );
-                    uploadImage(image, ref);
-                  },
-                  child: SizedBox(
-                    width: 60,
-                    height: 60,
-                    child: Image.asset(
-                      'assets/gallery.png',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ],
         ),

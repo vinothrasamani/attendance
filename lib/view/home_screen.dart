@@ -2,6 +2,7 @@ import 'package:attendance/base_file.dart';
 import 'package:attendance/main.dart';
 import 'package:attendance/model/user_model.dart';
 import 'package:attendance/view/profile_screen.dart';
+import 'package:attendance/view/today_attendance_screen.dart';
 import 'package:attendance/view_model/auth_service.dart';
 import 'package:attendance/view_model/home_service.dart';
 import 'package:attendance/view_model/user_sevice.dart';
@@ -85,6 +86,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       case 2:
         await AuthService.refreshSchool(ref);
         break;
+      case 3:
+        break;
+      case 4:
+        Get.to(() => TodayAttendanceScreen(),
+            transition: Transition.rightToLeft);
+        break;
       default:
     }
   }
@@ -133,8 +140,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       EdgeInsets.symmetric(vertical: 0, horizontal: 0),
                   leading: Padding(
                     padding: const EdgeInsets.only(left: 6),
-                    child: CircleAvatar(
-                      backgroundImage: AssetImage('assets/person.png'),
+                    child: FutureBuilder(
+                      future: BaseFile.getImage(user?.staffCode),
+                      builder: (context, snap) {
+                        if (snap.hasData) {
+                          return CircleAvatar(
+                            radius: 20,
+                            backgroundImage: AssetImage('assets/person.png'),
+                            foregroundImage: MemoryImage(snap.data!),
+                          );
+                        }
+                        return CircleAvatar(
+                          radius: 20,
+                          backgroundImage: AssetImage('assets/person.png'),
+                        );
+                      },
                     ),
                   ),
                   onTap: () {
@@ -157,6 +177,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           menuItem(1, 'Theme', Icons.brightness_4),
                           menuItem(2, 'Cloud Sync', Icons.cloud_sync),
                           menuItem(3, 'Notice', Icons.message),
+                          if (user?.appAdmin == '1')
+                            menuItem(4, 'Today Log', Icons.today),
                         ],
                       ),
                     ],

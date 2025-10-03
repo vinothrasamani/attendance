@@ -8,6 +8,10 @@ class TodayAttendanceScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Today Attendance'),
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(0.5),
+          child: Container(height: 0.5, color: Colors.grey),
+        ),
       ),
     );
   }

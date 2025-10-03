@@ -108,8 +108,10 @@ class HomeService {
         return;
       }
       preferences.setString('user', jsonEncode(data.data.user));
-      preferences.setString(
-          'profile_image', jsonDecode(res)['data']['user']['photo']);
+      if (jsonDecode(res)['data']['user']['photo'] != null) {
+        preferences.setString('profile_image_${data.data.user?.staffCode}',
+            jsonDecode(res)['data']['user']['photo']);
+      }
       await ref.read(userProvider.notifier).loadUser();
       final len = data.data.count;
       ref.read(current.notifier).state = len == 0 || len > 1 ? false : true;

@@ -1,14 +1,11 @@
-import 'dart:convert';
-
+import 'package:attendance/base_file.dart';
 import 'package:attendance/main.dart';
 import 'package:attendance/model/profile_model.dart';
 import 'package:attendance/view_model/profile_service.dart';
 import 'package:attendance/view_model/user_sevice.dart';
 import 'package:attendance/widget/error_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -53,16 +50,6 @@ class ProfileScreen extends ConsumerWidget {
       );
     }
 
-    Future<Uint8List> getImage() async {
-      SharedPreferences preferences = await SharedPreferences.getInstance();
-      final img = preferences.getString('profile_image');
-      Uint8List? source;
-      if (img != null) {
-        source = base64Decode(img);
-      }
-      return source ?? Uint8List(0);
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Profile'),
@@ -85,12 +72,11 @@ class ProfileScreen extends ConsumerWidget {
                     children: [
                       SizedBox(height: 20),
                       GestureDetector(
-                        onTap: () =>
-                            ProfileService.uploadProfile(ref, getImage()),
+                        onTap: () => ProfileService.uploadProfile(ref),
                         child: Stack(
                           children: [
                             FutureBuilder(
-                              future: getImage(),
+                              future: BaseFile.getImage(user?.staffCode),
                               builder: (context, snap) {
                                 if (snap.hasData) {
                                   return CircleAvatar(
@@ -138,7 +124,7 @@ class ProfileScreen extends ConsumerWidget {
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
-                      Text('code : ${user?.staffCode}'),
+                      Text('Staff Code : ${user?.staffCode}'),
                       SizedBox(height: 10),
                     ],
                   ),

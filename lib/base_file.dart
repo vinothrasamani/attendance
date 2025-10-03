@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BaseFile {
   static final ip = StateProvider<String>((ref) => '');
@@ -57,5 +59,15 @@ class BaseFile {
       debugPrint(e.toString());
       return jsonEncode({'success': false, 'message': 'Something went wrong!'});
     }
+  }
+
+  static Future<Uint8List> getImage(String? code) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    final img = preferences.getString('profile_image_$code');
+    Uint8List? source;
+    if (img != null) {
+      source = base64Decode(img);
+    }
+    return source ?? Uint8List(0);
   }
 }

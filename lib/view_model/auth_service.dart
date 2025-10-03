@@ -4,6 +4,7 @@ import 'package:attendance/model/school_model.dart';
 import 'package:attendance/model/user_model.dart';
 import 'package:attendance/view/home_screen.dart';
 import 'package:attendance/view_model/home_service.dart';
+import 'package:attendance/view_model/user_sevice.dart';
 import 'package:attendance/view_model/wifi_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -157,8 +158,11 @@ class AuthService {
       final data = userModelFromJson(res);
       if (data.success) {
         preferences.setString('user', jsonEncode(data.data));
-        preferences.setString(
-            'profile_image', jsonDecode(res)['data']['photo']);
+        final user = ref.read(userProvider);
+        if (jsonDecode(res)['data']['photo'] != null) {
+          preferences.setString('profile_image_${user?.staffCode}',
+              jsonDecode(res)['data']['photo']);
+        }
         Get.offAll(() => HomeScreen());
         Get.snackbar(
           'Logged In',
