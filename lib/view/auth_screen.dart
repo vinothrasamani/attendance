@@ -78,6 +78,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   final style = ElevatedButton.styleFrom(
     padding: EdgeInsets.all(15),
+    backgroundColor: Colors.white,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(10),
     ),

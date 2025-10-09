@@ -86,11 +86,59 @@ class TodayAttendanceScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final listener = ref.watch(TodayAttendanceService.todayAttendance);
+    final query = ref.watch(TodayAttendanceService.query);
+    final canSearch = ref.watch(TodayAttendanceService.canSearch);
+    final listener = query == null || query.isEmpty
+        ? ref.watch(TodayAttendanceService.todayAttendance)
+        : ref.watch(TodayAttendanceService.searchAtt(query));
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Today Attendance'),
+        title: canSearch
+            ? TextField(
+                decoration: InputDecoration(
+                  isDense: true,
+                  filled: true,
+                  fillColor: Colors.grey.withAlpha(50),
+                  prefixIcon: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                    child: Icon(Icons.search, size: 22),
+                  ),
+                  suffixIcon: GestureDetector(
+                    onTap: () {
+                      ref
+                          .read(TodayAttendanceService.canSearch.notifier)
+                          .state = false;
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 5, horizontal: 10),
+                      child: Icon(Icons.cancel, size: 22),
+                    ),
+                  ),
+                  suffixIconConstraints: BoxConstraints(maxHeight: 30),
+                  prefixIconConstraints: BoxConstraints(maxHeight: 30),
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                  border: OutlineInputBorder(borderSide: BorderSide.none),
+                ),
+                onTapOutside: (event) => FocusScope.of(context).unfocus(),
+                onChanged: (value) {
+                  ref.read(TodayAttendanceService.query.notifier).state = value;
+                },
+              )
+            : Text('Today Attendance'),
+        actions: [
+          if (!canSearch)
+            IconButton(
+              onPressed: () {
+                ref.read(TodayAttendanceService.canSearch.notifier).state =
+                    true;
+              },
+              icon: Icon(Icons.search),
+            ),
+        ],
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(0.5),
           child: Container(height: 0.5, color: Colors.grey),
@@ -136,6 +184,7 @@ class TodayAttendanceScreen extends ConsumerWidget {
             }
             return Center(
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.filter_list_off, size: 40),
                   SizedBox(height: 10),
