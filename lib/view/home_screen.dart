@@ -1,6 +1,7 @@
 import 'package:attendance/base_file.dart';
 import 'package:attendance/main.dart';
 import 'package:attendance/model/user_model.dart';
+import 'package:attendance/view/notice_screen.dart';
 import 'package:attendance/view/profile_screen.dart';
 import 'package:attendance/view/today_attendance_screen.dart';
 import 'package:attendance/view_model/auth_service.dart';
@@ -87,6 +88,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         await AuthService.refreshSchool(ref);
         break;
       case 3:
+        Get.to(() => NoticeScreen(), transition: Transition.rightToLeft);
         break;
       case 4:
         Get.to(() => TodayAttendanceScreen(),
