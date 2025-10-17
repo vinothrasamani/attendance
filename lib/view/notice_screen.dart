@@ -13,31 +13,6 @@ class NoticeScreen extends StatelessWidget {
         'body':
             'It\'s an example body one to display example UI for testing. It may replced while API integration.'
       },
-      {
-        'title': 'Notice title2',
-        'body':
-            'It\'s an example body one to display example UI for testing. It may replced while API integration.'
-      },
-      {
-        'title': 'Notice title1',
-        'body':
-            'It\'s an example body one to display example UI for testing. It may replced while API integration.'
-      },
-      {
-        'title': 'Notice title2',
-        'body':
-            'It\'s an example body one to display example UI for testing. It may replced while API integration.'
-      },
-      {
-        'title': 'Notice title1',
-        'body':
-            'It\'s an example body one to display example UI for testing. It may replced while API integration.'
-      },
-      {
-        'title': 'Notice title2',
-        'body':
-            'It\'s an example body one to display example UI for testing. It may replced while API integration.'
-      },
     ];
 
     return Scaffold(

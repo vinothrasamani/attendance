@@ -1,13 +1,11 @@
 import 'package:attendance/base_file.dart';
 import 'package:attendance/main.dart';
 import 'package:attendance/model/user_model.dart';
-import 'package:attendance/view/notice_screen.dart';
-import 'package:attendance/view/profile_screen.dart';
-import 'package:attendance/view/today_attendance_screen.dart';
 import 'package:attendance/view_model/auth_service.dart';
 import 'package:attendance/view_model/home_service.dart';
 import 'package:attendance/view_model/user_sevice.dart';
 import 'package:attendance/view_model/wifi_service.dart';
+import 'package:attendance/widget/app_drawer.dart';
 import 'package:attendance/widget/attendance.dart';
 import 'package:attendance/widget/error_card.dart';
 import 'package:attendance/widget/status.dart';
@@ -25,6 +23,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   User? user;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -47,9 +46,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(HomeService.isOk.notifier).state = val;
       if (val) {
         await HomeService.fetchStatus(ref);
-      } else {
-        await AuthService.refreshSchool(ref);
       }
+      AuthService.refreshSchool(ref);
     } catch (e) {
       debugPrint('Error in load: $e');
       ref.read(HomeService.err.notifier).state = true;
@@ -87,13 +85,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       case 2:
         await AuthService.refreshSchool(ref);
         break;
-      case 3:
-        Get.to(() => NoticeScreen(), transition: Transition.rightToLeft);
-        break;
-      case 4:
-        Get.to(() => TodayAttendanceScreen(),
-            transition: Transition.rightToLeft);
-        break;
       default:
     }
   }
@@ -125,6 +116,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final c = Colors.red[800]!;
     return Scaffold(
+      key: _scaffoldKey,
+      drawer: AppDrawer(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(10),
@@ -140,29 +133,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   dense: true,
                   contentPadding:
                       EdgeInsets.symmetric(vertical: 0, horizontal: 0),
-                  leading: Padding(
-                    padding: const EdgeInsets.only(left: 6),
-                    child: FutureBuilder(
-                      future: BaseFile.getImage(user?.staffCode),
-                      builder: (context, snap) {
-                        if (snap.hasData) {
-                          return CircleAvatar(
-                            radius: 20,
-                            backgroundImage: AssetImage('assets/person.png'),
-                            foregroundImage: MemoryImage(snap.data!),
-                          );
-                        }
-                        return CircleAvatar(
-                          radius: 20,
-                          backgroundImage: AssetImage('assets/person.png'),
-                        );
-                      },
-                    ),
+                  leading: IconButton(
+                    onPressed: () {
+                      _scaffoldKey.currentState?.openDrawer();
+                    },
+                    icon: Icon(Icons.menu, color: Colors.white),
                   ),
-                  onTap: () {
-                    Get.to(() => ProfileScreen(),
-                        transition: Transition.leftToRightWithFade);
-                  },
                   title: Text(
                     'Welcome ${user != null ? '${user!.firstName} ${user!.middleName ?? ''} ${user!.lastName ?? ''}' : 'User'}',
                     overflow: TextOverflow.ellipsis,
@@ -178,9 +154,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         itemBuilder: (ctx) => [
                           menuItem(1, 'Theme', Icons.brightness_4),
                           menuItem(2, 'Cloud Sync', Icons.cloud_sync),
-                          menuItem(3, 'Notice', Icons.message),
-                          if (user?.appAdmin == '1')
-                            menuItem(4, 'Today Log', Icons.today),
                         ],
                       ),
                     ],

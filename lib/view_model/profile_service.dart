@@ -36,14 +36,14 @@ class ProfileService {
   }
 
   static void uploadImage(XFile? image, WidgetRef ref) async {
-    double size = 300;
+    double size = 1080;
     final user = ref.read(userProvider);
     final ip = ref.read(BaseFile.ip);
     final port = ref.read(BaseFile.port);
     if (image != null) {
       final img = await ImageCropper().cropImage(
         sourcePath: image.path,
-        compressQuality: 60,
+        compressQuality: 100,
         maxWidth: size.toInt(),
         maxHeight: size.toInt(),
       );

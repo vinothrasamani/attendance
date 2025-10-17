@@ -141,7 +141,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         actions: [
           if (!canselect)
             ref.watch(AuthService.refreshing)
-                ? SizedBox(
+                ? Container(
+                    margin: EdgeInsets.only(right: 15),
                     height: 15,
                     width: 15,
                     child: CircularProgressIndicator(
@@ -192,7 +193,50 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           ),
                         ),
                         SizedBox(height: 10),
-                        for (var item in schoolList) schoolCard(item),
+                        if (schoolList.isEmpty)
+                          SizedBox(
+                            height: 200,
+                            child: Center(
+                              child: isLoading
+                                  ? CircularProgressIndicator(
+                                      color: Colors.white,
+                                    )
+                                  : Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'School list is empty!',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                        SizedBox(height: 10),
+                                        ElevatedButton(
+                                          onPressed: () async {
+                                            ref
+                                                .read(AuthService
+                                                    .isLoading.notifier)
+                                                .state = true;
+                                            await AuthService.loadSchools(ref);
+                                            ref
+                                                .read(AuthService
+                                                    .isLoading.notifier)
+                                                .state = false;
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.white,
+                                            foregroundColor: baseColor,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                          ),
+                                          child: Text('Retry'),
+                                        ),
+                                      ],
+                                    ),
+                            ),
+                          ),
+                        for (var item in schoolList)
+                          if (item.status == 1) schoolCard(item),
                       ],
                     ),
                   )

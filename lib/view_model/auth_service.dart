@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:attendance/model/school_model.dart';
 import 'package:attendance/model/user_model.dart';
+import 'package:attendance/view/auth_screen.dart';
 import 'package:attendance/view/home_screen.dart';
 import 'package:attendance/view_model/home_service.dart';
 import 'package:attendance/view_model/user_sevice.dart';
@@ -25,16 +26,22 @@ class AuthService {
 
   static Future<void> checkSelectionStatus(WidgetRef ref) async {
     final SharedPreferences preferences = await SharedPreferences.getInstance();
-    final school = preferences.getString('school');
-    if (school == null) {
-      ref.read(canSelectSchool.notifier).state = true;
-    } else {
-      ref.read(canSelectSchool.notifier).state = false;
-      final data = SchoolData.fromJson(jsonDecode(school));
-      ref.read(BaseFile.ip.notifier).state = data.ip;
-      ref.read(BaseFile.port.notifier).state = data.port;
-      ref.read(BaseFile.username.notifier).state = data.username;
-      ref.read(BaseFile.password.notifier).state = data.password;
+    try {
+      final school = preferences.getString('school');
+      if (school == null) {
+        ref.read(canSelectSchool.notifier).state = true;
+      } else {
+        ref.read(canSelectSchool.notifier).state = false;
+        final data = SchoolData.fromJson(jsonDecode(school));
+        ref.read(BaseFile.ip.notifier).state = data.ip;
+        ref.read(BaseFile.port.notifier).state = data.port;
+        ref.read(BaseFile.username.notifier).state = data.username;
+        ref.read(BaseFile.password.notifier).state = data.password;
+      }
+    } catch (e) {
+      await preferences.remove('school');
+      checkSelectionStatus(ref);
+      Get.offAll(() => AuthScreen(), transition: Transition.downToUp);
     }
   }
 
@@ -78,6 +85,21 @@ class AuthService {
           final data = jsonDecode(res.body);
           if (data['success']) {
             final info = SchoolData.fromJson(data['data']);
+            if (info.status == 0) {
+              await preferences.remove('user');
+              await preferences.remove('school');
+              ref.read(canSelectSchool.notifier).state = true;
+              Get.offAll(() => AuthScreen(),
+                  transition: Transition.leftToRight);
+              Get.snackbar(
+                'Logged Out',
+                'Restricted Location!',
+                borderRadius: 5,
+                backgroundColor: Colors.redAccent,
+                colorText: Colors.white,
+              );
+              return;
+            }
             preferences.setString('school', jsonEncode(data['data']));
             ref.read(BaseFile.ip.notifier).state = info.ip;
             ref.read(BaseFile.port.notifier).state = info.port;

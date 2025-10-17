@@ -37,6 +37,7 @@ class SchoolData {
   int port;
   String username;
   String password;
+  int status;
   DateTime createdAt;
   DateTime updatedAt;
 
@@ -49,6 +50,7 @@ class SchoolData {
     required this.password,
     required this.createdAt,
     required this.updatedAt,
+    required this.status,
   });
 
   factory SchoolData.fromJson(Map<String, dynamic> json) => SchoolData(
@@ -58,6 +60,7 @@ class SchoolData {
         port: json["port"],
         username: json["wifi_name"],
         password: json["wifi_password"],
+        status: json["status"],
         createdAt: DateTime.parse(json["created_at"]),
         updatedAt: DateTime.parse(json["updated_at"]),
       );
@@ -69,6 +72,7 @@ class SchoolData {
         "port": port,
         "wifi_name": username,
         "wifi_password": password,
+        "status": status,
         "created_at": createdAt.toIso8601String(),
         "updated_at": updatedAt.toIso8601String(),
       };
