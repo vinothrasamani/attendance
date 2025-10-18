@@ -217,25 +217,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       bottomNavigationBar: !isOk
           ? null
-          : Container(
-              height: 58,
-              margin: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
-              padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: baseColor,
-              ),
-              child: Row(
-                children: [
-                  btn('Today Status', index == 0, Icons.check_circle_outline,
-                      () {
-                    ref.read(HomeService.index.notifier).state = 0;
-                  }),
-                  VerticalDivider(color: Colors.white60),
-                  btn('Attendance', index == 1, Icons.fact_check, () {
-                    ref.read(HomeService.index.notifier).state = 1;
-                  }),
-                ],
+          : SafeArea(
+              child: Container(
+                height: 58,
+                margin: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
+                padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: baseColor,
+                ),
+                child: Row(
+                  children: [
+                    btn('Today Status', index == 0, Icons.check_circle_outline,
+                        () {
+                      ref.read(HomeService.index.notifier).state = 0;
+                    }),
+                    VerticalDivider(color: Colors.white60),
+                    btn('Attendance', index == 1, Icons.fact_check, () {
+                      ref.read(HomeService.index.notifier).state = 1;
+                    }),
+                  ],
+                ),
               ),
             ),
     );

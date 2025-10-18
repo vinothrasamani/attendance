@@ -12,7 +12,11 @@ void main() async {
   WifiService().init();
   await InstallIdManager.getInstallId();
   SystemChrome.setPreferredOrientations(
-    [DeviceOrientation.portraitDown, DeviceOrientation.portraitUp],
+      [DeviceOrientation.portraitDown, DeviceOrientation.portraitUp]);
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+        systemNavigationBarColor: Colors.black,
+        systemNavigationBarIconBrightness: Brightness.light),
   );
   runApp(ProviderScope(child: const MyApp()));
 }
