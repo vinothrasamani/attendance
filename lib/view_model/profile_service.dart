@@ -70,7 +70,7 @@ class ProfileService {
   }
 
   static void uploadProfile(WidgetRef ref) async {
-    double size = 300;
+    double size = 1080;
     await getMediaPermission();
     await Get.dialog(
       AlertDialog(
