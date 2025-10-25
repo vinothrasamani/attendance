@@ -1,7 +1,10 @@
+import 'package:attendance/base_file.dart';
 import 'package:attendance/main.dart';
+import 'package:attendance/model/sibiling_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
+import 'package:dio/dio.dart' as dio;
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -10,11 +13,13 @@ class ApplicationViewmodel {
   static final emis = StateProvider.autoDispose<String?>((ref) => null);
   static final newEmis = StateProvider.autoDispose<String?>((ref) => null);
   static final staffName = StateProvider.autoDispose<String?>((ref) => null);
-  static final addhar = StateProvider.autoDispose<String?>((ref) => null);
+  static final aadhar = StateProvider.autoDispose<String?>((ref) => null);
   static final gender = StateProvider.autoDispose<String?>((ref) => null);
   static final tcNo = StateProvider.autoDispose<String?>((ref) => null);
   static final adminNo = StateProvider.autoDispose<String?>((ref) => null);
+  static final appNo = StateProvider.autoDispose<String?>((ref) => null);
   static final academicYear = StateProvider.autoDispose<String?>((ref) => null);
+  static final branch = StateProvider.autoDispose<String?>((ref) => null);
   static final classIs = StateProvider.autoDispose<String?>((ref) => null);
   static final sectionIs = StateProvider.autoDispose<String?>((ref) => null);
   static final bgrp = StateProvider.autoDispose<String?>((ref) => null);
@@ -26,6 +31,9 @@ class ApplicationViewmodel {
       StateProvider.autoDispose<DateTime>((ref) => DateTime.now());
   static final adminDate =
       StateProvider.autoDispose<DateTime>((ref) => DateTime.now());
+  static final isLoading = StateProvider.autoDispose<bool>((ref) => false);
+  static final sibiling =
+      StateProvider.autoDispose<SibilingData?>((ref) => null);
 
   Widget title(String txt, IconData icon) {
     return Row(
@@ -128,5 +136,70 @@ class ApplicationViewmodel {
         ),
       ),
     );
+  }
+
+  static Future<void> submitInfo(WidgetRef ref) async {
+    ref.read(isLoading.notifier).state = true;
+    final myDio = dio.Dio();
+    final img = ref.read(imagePath.notifier).state;
+    final oId = ref.read(sibiling)!.oid;
+    final data = {
+      'oId': oId,
+      'name': ref.read(name),
+      'dob': ref.read(dob).toIso8601String(),
+      'appNo': ref.read(appNo),
+      'adminNo': ref.read(adminNo),
+      'adminDate': ref.read(adminDate).toIso8601String(),
+      'emis': ref.read(emis),
+      'newEmis': ref.read(newEmis),
+      'staff': ref.read(staffName),
+      'aadhar': ref.read(aadhar),
+      'gender': ref.read(gender),
+      'tcNo': ref.read(tcNo),
+      'academicYear': ref.read(academicYear),
+      'branch': ref.read(branch),
+      'class': ref.read(classIs),
+      'section': ref.read(sectionIs),
+      'bloodGrp': ref.read(bgrp),
+      'identity1': ref.read(idm1),
+      'identity2': ref.read(idm2),
+      'pysicalDis': ref.read(pds),
+      if (img != null)
+        'image': await dio.MultipartFile.fromFile(img,
+            filename: img.split('/').last),
+    };
+    dio.FormData formData = dio.FormData.fromMap(data);
+    final res = await myDio
+        .post('${BaseFile.baseApiNetUrl}/store-application',
+            data: formData,
+            options: dio.Options(headers: {'Accept': 'application/json'}))
+        .catchError((err) {
+      debugPrint('Error on => ${err.toString()}');
+      ref.read(isLoading.notifier).state = false;
+      return err;
+    });
+    if (res.statusCode == 200) {}
+    ref.read(isLoading.notifier).state = false;
+  }
+
+  static void fetchsibilings(WidgetRef ref, String no) async {
+    ref.read(isLoading.notifier).state = true;
+    final ip = ref.read(BaseFile.ip);
+    final port = ref.read(BaseFile.port);
+    final res = await BaseFile.postMethod('sibiling', {"appNo": no}, ip, port,
+        appUrl: BaseFile.baseApiNetUrl);
+    final data = sibilingModelFromJson(res);
+    if (data.success) {
+      ref.read(sibiling.notifier).state = data.data;
+    } else {
+      Get.snackbar(
+        'Failed!',
+        data.message,
+        borderRadius: 5,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
+    }
+    ref.read(isLoading.notifier).state = false;
   }
 }

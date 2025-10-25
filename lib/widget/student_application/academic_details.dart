@@ -94,6 +94,26 @@ class AcademicDetails extends ConsumerWidget {
             children: [
               vm.title('Academic Master', Icons.details_rounded),
               SizedBox(height: 15),
+              Text('➡ Application No'),
+              TextFormField(
+                initialValue: ref.watch(ApplicationViewmodel.appNo),
+                validator: vm.validate,
+                keyboardType: TextInputType.number,
+                decoration: vm.decoration('Application No'),
+                onChanged: (value) =>
+                    ref.read(ApplicationViewmodel.appNo.notifier).state = value,
+              ),
+              SizedBox(height: 15),
+              Text('➡ Branch'),
+              TextFormField(
+                initialValue: ref.watch(ApplicationViewmodel.branch),
+                validator: vm.validate,
+                decoration: vm.decoration('Branch'),
+                onChanged: (value) => ref
+                    .read(ApplicationViewmodel.branch.notifier)
+                    .state = value,
+              ),
+              SizedBox(height: 15),
               Text('➡ EMIS No'),
               TextFormField(
                 initialValue: ref.watch(ApplicationViewmodel.emis),

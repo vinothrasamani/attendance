@@ -66,12 +66,12 @@ class PersonalDetails extends ConsumerWidget {
           SizedBox(height: 15),
           Text('➡ Addhar No'),
           TextFormField(
-            initialValue: ref.watch(ApplicationViewmodel.addhar),
+            initialValue: ref.watch(ApplicationViewmodel.aadhar),
             decoration: vm.decoration('Addhar'),
             validator: vm.validate,
             keyboardType: TextInputType.number,
             onChanged: (value) =>
-                ref.read(ApplicationViewmodel.addhar.notifier).state = value,
+                ref.read(ApplicationViewmodel.aadhar.notifier).state = value,
           ),
           SizedBox(height: 15),
           Text('➡ Student Photo'),
