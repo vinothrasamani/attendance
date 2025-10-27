@@ -12,7 +12,7 @@ class BaseFile {
   static final username = StateProvider<String>((ref) => '');
   static final password = StateProvider<String>((ref) => '');
   static String baseNetworkUrl = 'https://cpanel.ijessi.com/api';
-  static String baseApiNetUrl = 'http://192.168.1.5:8000/api';
+  static String baseApiNetUrl = 'http://192.168.1.4:8000/api';
 
   static Future<dynamic> postMethod(
       String endpoint, Object object, String ip, int port,
@@ -40,10 +40,11 @@ class BaseFile {
     }
   }
 
-  static Future<dynamic> getMethod(String endpoint, String ip, int port) async {
+  static Future<dynamic> getMethod(String endpoint, String ip, int port,
+      {String? appUrl}) async {
     try {
       String baseUrl = 'http://$ip:$port/api';
-      final url = Uri.parse('$baseUrl/$endpoint');
+      final url = Uri.parse('${appUrl ?? baseUrl}/$endpoint');
       final res = await http.get(url, headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',

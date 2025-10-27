@@ -1,6 +1,7 @@
 import 'package:attendance/base_file.dart';
 import 'package:attendance/main.dart';
-import 'package:attendance/model/sibiling_model.dart';
+import 'package:attendance/model/credentials_model.dart';
+import 'package:attendance/model/student_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
@@ -23,6 +24,8 @@ class ApplicationViewmodel {
   static final classIs = StateProvider.autoDispose<String?>((ref) => null);
   static final sectionIs = StateProvider.autoDispose<String?>((ref) => null);
   static final bgrp = StateProvider.autoDispose<String?>((ref) => null);
+  static final prefGrp = StateProvider.autoDispose<String?>((ref) => null);
+  static final lastSchool = StateProvider.autoDispose<String?>((ref) => null);
   static final idm1 = StateProvider.autoDispose<String?>((ref) => null);
   static final idm2 = StateProvider.autoDispose<String?>((ref) => null);
   static final pds = StateProvider.autoDispose<String?>((ref) => null);
@@ -32,8 +35,9 @@ class ApplicationViewmodel {
   static final adminDate =
       StateProvider.autoDispose<DateTime>((ref) => DateTime.now());
   static final isLoading = StateProvider.autoDispose<bool>((ref) => false);
-  static final sibiling =
-      StateProvider.autoDispose<SibilingData?>((ref) => null);
+  static final student = StateProvider.autoDispose<StudentData?>((ref) => null);
+  static final credentials =
+      StateProvider.autoDispose<Credentials?>((ref) => null);
 
   Widget title(String txt, IconData icon) {
     return Row(
@@ -138,36 +142,55 @@ class ApplicationViewmodel {
     );
   }
 
-  static Future<void> submitInfo(WidgetRef ref) async {
+  static Future<void> submitInfo(WidgetRef ref, bool isApp) async {
     ref.read(isLoading.notifier).state = true;
     final myDio = dio.Dio();
     final img = ref.read(imagePath.notifier).state;
-    final oId = ref.read(sibiling)!.oid;
-    final data = {
-      'oId': oId,
-      'name': ref.read(name),
-      'dob': ref.read(dob).toIso8601String(),
-      'appNo': ref.read(appNo),
-      'adminNo': ref.read(adminNo),
-      'adminDate': ref.read(adminDate).toIso8601String(),
-      'emis': ref.read(emis),
-      'newEmis': ref.read(newEmis),
-      'staff': ref.read(staffName),
-      'aadhar': ref.read(aadhar),
-      'gender': ref.read(gender),
-      'tcNo': ref.read(tcNo),
-      'academicYear': ref.read(academicYear),
-      'branch': ref.read(branch),
-      'class': ref.read(classIs),
-      'section': ref.read(sectionIs),
-      'bloodGrp': ref.read(bgrp),
-      'identity1': ref.read(idm1),
-      'identity2': ref.read(idm2),
-      'pysicalDis': ref.read(pds),
-      if (img != null)
-        'image': await dio.MultipartFile.fromFile(img,
-            filename: img.split('/').last),
-    };
+    final oId = ref.read(student)!.oid;
+    final data = isApp
+        ? {
+            'name': ref.read(name),
+            'dob': ref.read(dob).toIso8601String(),
+            'appNo': ref.read(appNo),
+            'gender': ref.read(gender),
+            'class': ref.read(classIs),
+            'academicYear': ref.read(academicYear),
+            'branch': ref.read(branch),
+            'prefGrp': ref.read(prefGrp),
+            'lastSchool': ref.read(lastSchool),
+            'pysicalDis': ref.read(pds),
+            if (img != null)
+              'image': await dio.MultipartFile.fromFile(
+                img,
+                filename: img.split('/').last,
+              ),
+          }
+        : {
+            'oId': oId,
+            'name': ref.read(name),
+            'dob': ref.read(dob).toIso8601String(),
+            'appNo': ref.read(appNo),
+            'adminNo': ref.read(adminNo),
+            'adminDate': ref.read(adminDate).toIso8601String(),
+            'emis': ref.read(emis),
+            'newEmis': ref.read(newEmis),
+            'staff': ref.read(staffName),
+            'aadhar': ref.read(aadhar),
+            'gender': ref.read(gender),
+            'tcNo': ref.read(tcNo),
+            'academicYear': ref.read(academicYear),
+            'branch': ref.read(branch),
+            'class': ref.read(classIs),
+            'section': ref.read(sectionIs),
+            'bloodGrp': ref.read(bgrp),
+            'identity1': ref.read(idm1),
+            'identity2': ref.read(idm2),
+            'pysicalDis': ref.read(pds),
+            if (img != null)
+              'image': await dio.MultipartFile.fromFile(img,
+                  filename: img.split('/').last),
+          };
+    print(data);
     dio.FormData formData = dio.FormData.fromMap(data);
     final res = await myDio
         .post('${BaseFile.baseApiNetUrl}/store-application',
@@ -178,19 +201,33 @@ class ApplicationViewmodel {
       ref.read(isLoading.notifier).state = false;
       return err;
     });
-    if (res.statusCode == 200) {}
+    if (res.statusCode == 200) {
+      debugPrint(res.data);
+    }
     ref.read(isLoading.notifier).state = false;
   }
 
-  static void fetchsibilings(WidgetRef ref, String no) async {
+  static void fetchCredentials(WidgetRef ref) async {
+    final ip = ref.read(BaseFile.ip);
+    final port = ref.read(BaseFile.port);
+    final res = await BaseFile.getMethod('credentials', ip, port,
+        appUrl: BaseFile.baseApiNetUrl);
+    final data = credentialsModelFromJson(res);
+    if (data.success) {
+      ref.read(credentials.notifier).state = data.data;
+    }
+  }
+
+  static void fetchApplication(WidgetRef ref, String no) async {
     ref.read(isLoading.notifier).state = true;
     final ip = ref.read(BaseFile.ip);
     final port = ref.read(BaseFile.port);
-    final res = await BaseFile.postMethod('sibiling', {"appNo": no}, ip, port,
+    final res = await BaseFile.postMethod(
+        'student-application', {"appNo": no}, ip, port,
         appUrl: BaseFile.baseApiNetUrl);
     final data = sibilingModelFromJson(res);
     if (data.success) {
-      ref.read(sibiling.notifier).state = data.data;
+      ref.read(student.notifier).state = data.data;
     } else {
       Get.snackbar(
         'Failed!',

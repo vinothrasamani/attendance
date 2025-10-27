@@ -7,7 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
 class StudentApplicationScreen extends ConsumerStatefulWidget {
-  const StudentApplicationScreen({super.key});
+  const StudentApplicationScreen({super.key, required this.isApp});
+  final bool isApp;
 
   @override
   ConsumerState<StudentApplicationScreen> createState() =>
@@ -18,6 +19,12 @@ class _StudentApplicationScreenState
     extends ConsumerState<StudentApplicationScreen> {
   final _formKey = GlobalKey<FormState>();
   String? query;
+
+  @override
+  void initState() {
+    ApplicationViewmodel.fetchCredentials(ref);
+    super.initState();
+  }
 
   void submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) {
@@ -30,12 +37,14 @@ class _StudentApplicationScreenState
       );
       return;
     }
-    await ApplicationViewmodel.submitInfo(ref);
+    if (ref.read(ApplicationViewmodel.credentials) != null) {
+      await ApplicationViewmodel.submitInfo(ref, widget.isApp);
+    }
   }
 
   void searchSibiling() async {
     if (query != null) {
-      ApplicationViewmodel.fetchsibilings(ref, query!);
+      ApplicationViewmodel.fetchApplication(ref, query!);
     }
   }
 
@@ -61,17 +70,18 @@ class _StudentApplicationScreenState
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(ApplicationViewmodel.isLoading);
-    final sibiling = ref.watch(ApplicationViewmodel.sibiling);
+    final student = ref.watch(ApplicationViewmodel.student);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Student Application')),
+      appBar: AppBar(
+          title: Text(widget.isApp ? 'Student Application' : 'Student Master')),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
           child: OutlinedButton(
             onPressed: isLoading
                 ? null
-                : sibiling != null
+                : student != null
                     ? submit
                     : searchSibiling,
             style: OutlinedButton.styleFrom(
@@ -89,11 +99,16 @@ class _StudentApplicationScreenState
                         child: CircularProgressIndicator(strokeWidth: 2),
                       ),
                       SizedBox(width: 8),
-                      Text(sibiling != null ? 'Saving..' : 'searching..'),
+                      Text(student != null ? 'Saving..' : 'searching..'),
                     ],
                   )
                 : Text(
-                    sibiling != null ? 'Save Application' : 'Search Sibilings'),
+                    student != null
+                        ? 'Save Application'
+                        : widget.isApp
+                            ? 'Search Sibilings'
+                            : 'Search Application',
+                  ),
           ),
         ),
       ),
@@ -101,44 +116,46 @@ class _StudentApplicationScreenState
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(12),
-            child: sibiling != null
+            child: student != null
                 ? Form(
                     key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Colors.grey.withAlpha(40),
+                        if (widget.isApp)
+                          Container(
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              color: Colors.grey.withAlpha(40),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ApplicationViewmodel().title(
+                                    'Sibiling Information',
+                                    Icons.verified_user),
+                                const SizedBox(height: 10),
+                                info(
+                                    '🤵 Name : ',
+                                    student.firstName == null &&
+                                            student.lastName == null
+                                        ? 'No Name available!'
+                                        : '${student.firstName} ${student.lastName ?? ''}'),
+                                SizedBox(height: 10),
+                                info('✨ Application No : ',
+                                    student.applicationNo),
+                              ],
+                            ),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ApplicationViewmodel().title(
-                                  'Sibiling Information', Icons.verified_user),
-                              const SizedBox(height: 10),
-                              info(
-                                  '🤵 Name : ',
-                                  sibiling.firstName == null &&
-                                          sibiling.lastName == null
-                                      ? 'No Name available!'
-                                      : '${sibiling.firstName} ${sibiling.lastName ?? ''}'),
-                              SizedBox(height: 10),
-                              info('✨ Application No : ',
-                                  sibiling.applicationNo),
-                            ],
-                          ),
-                        ),
-                        Divider(),
+                        if (widget.isApp) Divider(),
                         const SizedBox(height: 10),
-                        const PersonalDetails(),
+                        PersonalDetails(isApp: widget.isApp),
                         const SizedBox(height: 10),
-                        const AcademicDetails(),
+                        AcademicDetails(isApp: widget.isApp),
                         const SizedBox(height: 10),
-                        const StudentIdentities(),
+                        StudentIdentities(isApp: widget.isApp),
                       ],
                     ),
                   )
@@ -163,7 +180,7 @@ class _StudentApplicationScreenState
                         ),
                         SizedBox(height: 10),
                         Text(
-                          '✨ Search sibilings by application number!',
+                          '✨ Search ${widget.isApp ? 'sibilings' : 'application'} by application number!',
                           style: TextStyle(fontSize: 16),
                         ),
                       ],

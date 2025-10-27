@@ -83,8 +83,15 @@ class AppDrawer extends ConsumerWidget {
             menuItem('Notice', Icons.message, NoticeScreen()),
             menuItem(
               'Student Application',
-              Icons.person_add,
-              StudentApplicationScreen(),
+              Icons.person_add_alt_1,
+              StudentApplicationScreen(isApp: true),
+            ),
+            menuItem(
+              'Student Master',
+              Icons.person_search,
+              StudentApplicationScreen(
+                isApp: false,
+              ),
             ),
             if (user?.appAdmin == '1')
               menuItem('Today Log', Icons.today, TodayAttendanceScreen()),

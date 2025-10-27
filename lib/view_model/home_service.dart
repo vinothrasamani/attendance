@@ -152,7 +152,7 @@ class HomeService {
   static Future<bool> isServerReachable(String ip, int port) async {
     try {
       final socket = await Socket.connect(ip.trim(), port,
-          timeout: const Duration(seconds: 3));
+          timeout: const Duration(seconds: 6));
       socket.destroy();
       return true;
     } catch (e) {

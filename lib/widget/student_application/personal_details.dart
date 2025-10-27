@@ -7,7 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:attendance/widget/date_field.dart';
 
 class PersonalDetails extends ConsumerWidget {
-  const PersonalDetails({super.key});
+  const PersonalDetails({super.key, required this.isApp});
+  final bool isApp;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -63,16 +64,18 @@ class PersonalDetails extends ConsumerWidget {
             onChanged: (value) =>
                 ref.read(ApplicationViewmodel.gender.notifier).state = value,
           ),
-          SizedBox(height: 15),
-          Text('➡ Addhar No'),
-          TextFormField(
-            initialValue: ref.watch(ApplicationViewmodel.aadhar),
-            decoration: vm.decoration('Addhar'),
-            validator: vm.validate,
-            keyboardType: TextInputType.number,
-            onChanged: (value) =>
-                ref.read(ApplicationViewmodel.aadhar.notifier).state = value,
-          ),
+          if (!isApp) ...[
+            SizedBox(height: 15),
+            Text('➡ Addhar No'),
+            TextFormField(
+              initialValue: ref.watch(ApplicationViewmodel.aadhar),
+              decoration: vm.decoration('Addhar'),
+              validator: vm.validate,
+              keyboardType: TextInputType.number,
+              onChanged: (value) =>
+                  ref.read(ApplicationViewmodel.aadhar.notifier).state = value,
+            ),
+          ],
           SizedBox(height: 15),
           Text('➡ Student Photo'),
           Builder(builder: (context) {

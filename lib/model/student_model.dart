@@ -1,24 +1,24 @@
 import 'dart:convert';
 
-SibilingModel sibilingModelFromJson(String str) =>
-    SibilingModel.fromJson(json.decode(str));
+StudentModel sibilingModelFromJson(String str) =>
+    StudentModel.fromJson(json.decode(str));
 
-String sibilingModelToJson(SibilingModel data) => json.encode(data.toJson());
+String sibilingModelToJson(StudentModel data) => json.encode(data.toJson());
 
-class SibilingModel {
+class StudentModel {
   bool success;
-  SibilingData? data;
+  StudentData? data;
   String message;
 
-  SibilingModel({
+  StudentModel({
     required this.success,
     required this.data,
     required this.message,
   });
 
-  factory SibilingModel.fromJson(Map<String, dynamic> json) => SibilingModel(
+  factory StudentModel.fromJson(Map<String, dynamic> json) => StudentModel(
         success: json["success"],
-        data: json["data"] == null ? null : SibilingData.fromJson(json["data"]),
+        data: json["data"] == null ? null : StudentData.fromJson(json["data"]),
         message: json["message"],
       );
 
@@ -29,20 +29,20 @@ class SibilingModel {
       };
 }
 
-class SibilingData {
+class StudentData {
   String oid;
   String applicationNo;
   String? firstName;
   String? lastName;
 
-  SibilingData({
+  StudentData({
     required this.oid,
     required this.applicationNo,
     required this.firstName,
     required this.lastName,
   });
 
-  factory SibilingData.fromJson(Map<String, dynamic> json) => SibilingData(
+  factory StudentData.fromJson(Map<String, dynamic> json) => StudentData(
         oid: json["Oid"],
         applicationNo: json["ApplicationNo"],
         firstName: json["FirstName"],
