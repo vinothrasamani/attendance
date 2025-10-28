@@ -71,6 +71,7 @@ class _StudentApplicationScreenState
   Widget build(BuildContext context) {
     final isLoading = ref.watch(ApplicationViewmodel.isLoading);
     final student = ref.watch(ApplicationViewmodel.student);
+    final credentials = ref.watch(ApplicationViewmodel.credentials);
 
     return Scaffold(
       appBar: AppBar(
@@ -151,11 +152,19 @@ class _StudentApplicationScreenState
                           ),
                         if (widget.isApp) Divider(),
                         const SizedBox(height: 10),
-                        PersonalDetails(isApp: widget.isApp),
+                        PersonalDetails(
+                          isApp: widget.isApp,
+                          genders:
+                              credentials != null ? credentials.gender : [],
+                        ),
                         const SizedBox(height: 10),
-                        AcademicDetails(isApp: widget.isApp),
+                        AcademicDetails(
+                            isApp: widget.isApp, cInfo: credentials),
                         const SizedBox(height: 10),
-                        StudentIdentities(isApp: widget.isApp),
+                        StudentIdentities(
+                          isApp: widget.isApp,
+                          pcd: credentials != null ? credentials.phys : [],
+                        ),
                       ],
                     ),
                   )

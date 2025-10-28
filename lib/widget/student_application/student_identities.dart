@@ -1,10 +1,12 @@
+import 'package:attendance/model/credentials_model.dart';
 import 'package:attendance/view_model/application_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class StudentIdentities extends ConsumerWidget {
-  const StudentIdentities({super.key, required this.isApp});
+  const StudentIdentities({super.key, required this.isApp, required this.pcd});
   final bool isApp;
+  final List<CredentialInfo> pcd;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,10 +52,19 @@ class StudentIdentities extends ConsumerWidget {
           ],
           SizedBox(height: 15),
           Text('➡ Pysical Disability'),
-          TextFormField(
-            initialValue: ref.watch(ApplicationViewmodel.pds),
+          DropdownButtonFormField<String>(
             decoration: vm.decoration('Disability'),
             validator: vm.validate,
+            items: pcd.isEmpty
+                ? []
+                : pcd
+                    .map((item) => DropdownMenuItem<String>(
+                          value: item.oid,
+                          child: Text(item.description),
+                        ))
+                    .toList(),
+            borderRadius: BorderRadius.circular(10),
+            value: ref.watch(ApplicationViewmodel.pds),
             onChanged: (value) =>
                 ref.read(ApplicationViewmodel.pds.notifier).state = value,
           ),

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:attendance/model/credentials_model.dart';
 import 'package:attendance/view_model/application_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,8 +8,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:attendance/widget/date_field.dart';
 
 class PersonalDetails extends ConsumerWidget {
-  const PersonalDetails({super.key, required this.isApp});
+  const PersonalDetails(
+      {super.key, required this.isApp, required this.genders});
   final bool isApp;
+  final List<CredentialInfo> genders;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -53,12 +56,14 @@ class PersonalDetails extends ConsumerWidget {
           DropdownButtonFormField<String>(
             decoration: vm.decoration('Gender'),
             validator: vm.validate,
-            items: ['Male', 'Female', 'Others']
-                .map((item) => DropdownMenuItem<String>(
-                      value: item,
-                      child: Text(item),
-                    ))
-                .toList(),
+            items: genders.isEmpty
+                ? []
+                : genders
+                    .map((item) => DropdownMenuItem<String>(
+                          value: item.oid,
+                          child: Text(item.description),
+                        ))
+                    .toList(),
             borderRadius: BorderRadius.circular(10),
             value: ref.watch(ApplicationViewmodel.gender),
             onChanged: (value) =>

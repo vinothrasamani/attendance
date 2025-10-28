@@ -1,11 +1,13 @@
+import 'package:attendance/model/credentials_model.dart';
 import 'package:attendance/view_model/application_viewmodel.dart';
 import 'package:attendance/widget/date_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AcademicDetails extends ConsumerWidget {
-  const AcademicDetails({super.key, required this.isApp});
+  const AcademicDetails({super.key, required this.isApp, required this.cInfo});
   final bool isApp;
+  final Credentials? cInfo;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,6 +24,7 @@ class AcademicDetails extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               vm.title('Academic Details', Icons.school),
+              SizedBox(height: 15),
               Text('➡ Application No'),
               TextFormField(
                 initialValue: ref.watch(ApplicationViewmodel.appNo),
@@ -53,14 +56,53 @@ class AcademicDetails extends ConsumerWidget {
               ),
               SizedBox(height: 15),
               Text('➡ Class Joined'),
-              TextFormField(
-                initialValue: ref.watch(ApplicationViewmodel.classIs),
-                validator: vm.validate,
+              DropdownButtonFormField<String>(
                 decoration: vm.decoration('Class'),
+                validator: vm.validate,
+                items: cInfo == null || cInfo!.dataClass.isEmpty
+                    ? []
+                    : cInfo!.dataClass
+                        .map((item) => DropdownMenuItem<String>(
+                              value: item.oid,
+                              child: Text(item.description),
+                            ))
+                        .toList(),
+                borderRadius: BorderRadius.circular(10),
+                value: ref.watch(ApplicationViewmodel.classIs),
                 onChanged: (value) => ref
                     .read(ApplicationViewmodel.classIs.notifier)
                     .state = value,
               ),
+              if (isApp) ...[
+                SizedBox(height: 15),
+                Text('➡ Preffered Group'),
+                DropdownButtonFormField<String>(
+                  decoration: vm.decoration('Group'),
+                  validator: vm.validate,
+                  items: cInfo == null || cInfo!.pGroup.isEmpty
+                      ? []
+                      : cInfo!.pGroup
+                          .map((item) => DropdownMenuItem<String>(
+                                value: item.oid,
+                                child: Text(item.description),
+                              ))
+                          .toList(),
+                  borderRadius: BorderRadius.circular(10),
+                  value: ref.watch(ApplicationViewmodel.prefGrp),
+                  onChanged: (value) => ref
+                      .read(ApplicationViewmodel.prefGrp.notifier)
+                      .state = value,
+                ),
+                SizedBox(height: 15),
+                Text('➡ Previous school studied'),
+                TextFormField(
+                  initialValue: ref.watch(ApplicationViewmodel.lastSchool),
+                  decoration: vm.decoration('Preivous School'),
+                  onChanged: (value) => ref
+                      .read(ApplicationViewmodel.lastSchool.notifier)
+                      .state = value,
+                ),
+              ],
               if (!isApp) ...[
                 SizedBox(height: 15),
                 Text('➡ Section Joined'),
@@ -70,26 +112,6 @@ class AcademicDetails extends ConsumerWidget {
                   decoration: vm.decoration('Section'),
                   onChanged: (value) => ref
                       .read(ApplicationViewmodel.sectionIs.notifier)
-                      .state = value,
-                ),
-                SizedBox(height: 15),
-                Text('➡ Preffered Group'),
-                TextFormField(
-                  initialValue: ref.watch(ApplicationViewmodel.prefGrp),
-                  validator: vm.validate,
-                  decoration: vm.decoration('Group'),
-                  onChanged: (value) => ref
-                      .read(ApplicationViewmodel.prefGrp.notifier)
-                      .state = value,
-                ),
-                SizedBox(height: 15),
-                Text('➡ Previous school studied'),
-                TextFormField(
-                  initialValue: ref.watch(ApplicationViewmodel.lastSchool),
-                  validator: vm.validate,
-                  decoration: vm.decoration('Preivous School'),
-                  onChanged: (value) => ref
-                      .read(ApplicationViewmodel.lastSchool.notifier)
                       .state = value,
                 ),
               ],
@@ -108,7 +130,6 @@ class AcademicDetails extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 vm.title('Academic Master', Icons.details_rounded),
-                SizedBox(height: 15),
                 SizedBox(height: 15),
                 Text('➡ Admission No'),
                 TextFormField(

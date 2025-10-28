@@ -156,6 +156,9 @@ class HomeService {
       socket.destroy();
       return true;
     } catch (e) {
+      debugPrint(
+        'Unable to connect with this ip : $ip and port : $port with the error : $e',
+      );
       return false;
     }
   }

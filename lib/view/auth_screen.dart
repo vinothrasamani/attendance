@@ -32,9 +32,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     if (_key.currentState!.validate()) {
       ref.read(AuthService.isLoading.notifier).state = true;
       if (!ref.read(AuthService.canSelectSchool)) {
-        await WifiService.connectToWifi(
+        final conn = await WifiService.connectToWifi(
           ref.read(BaseFile.username),
           ref.read(BaseFile.password),
+        );
+        debugPrint(
+          conn ? 'Connected to Wi-Fi!' : 'Unable to connect with Wi-Fi!',
         );
       }
       token = await InstallIdManager.getInstallId();
