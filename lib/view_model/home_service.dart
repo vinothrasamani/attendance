@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:attendance/base_file.dart';
+import 'package:attendance/install_id_manager.dart';
 import 'package:attendance/model/attendance_model.dart';
 import 'package:attendance/model/status_model.dart';
 import 'package:attendance/view/auth_screen.dart';
@@ -25,6 +26,20 @@ class HomeService {
       StateProvider<Map<DateTime, String>>((ref) => {});
   static final shift = StateProvider<Todayshift?>((ref) => null);
   static final list = StateProvider<List<AttendanceData>>((ref) => []);
+  static final years = StateProvider((ref) => []);
+  static final branches = StateProvider((ref) => []);
+
+  static Future<void> fetchCore(WidgetRef ref) async {
+    final ip = ref.read(BaseFile.ip);
+    final port = ref.read(BaseFile.port);
+    final res = await BaseFile.getMethod('core-info', ip, port,
+        appUrl: BaseFile.baseApiNetUrl);
+    final data = jsonDecode(res);
+    if (data['success']) {
+      ref.read(years.notifier).state = data['data']['years'];
+      ref.read(branches.notifier).state = data['data']['branches'];
+    }
+  }
 
   static Future<void> fetchAttendance(WidgetRef ref, DateTime day) async {
     ref.read(isLoading.notifier).state = true;
@@ -89,22 +104,20 @@ class HomeService {
   static Future<void> fetchStatus(WidgetRef ref) async {
     final ip = ref.read(BaseFile.ip);
     final port = ref.read(BaseFile.port);
-    final user = ref.read(userProvider);
+    var user = ref.read(userProvider);
     final SharedPreferences preferences = await SharedPreferences.getInstance();
     final res = await BaseFile.getMethod(
         'fetch-status?code=${user?.staffCode}&day=${DateTime.now()}', ip, port);
     final data = statusModelFromJson(res);
     if (data.success) {
       if (data.data.user == null) {
-        await preferences.remove('user');
-        Get.offAll(() => AuthScreen(), transition: Transition.leftToRight);
-        Get.snackbar(
-          'Logged Out',
-          'Invalid user, Please login with credential',
-          borderRadius: 5,
-          backgroundColor: Colors.redAccent,
-          colorText: Colors.white,
-        );
+        goToLogin(preferences, 'Invalid user, Please login with credential!');
+        return;
+      }
+      final mToken = await InstallIdManager.getInstallId();
+      final verified = data.data.user?.token?.trim() == mToken?.trim();
+      if (!verified) {
+        goToLogin(preferences, 'Token mismatch, Please visit admin!');
         return;
       }
       preferences.setString('user', jsonEncode(data.data.user));
@@ -117,6 +130,19 @@ class HomeService {
       ref.read(current.notifier).state = len == 0 || len > 1 ? false : true;
       ref.read(shift.notifier).state = data.data.todayshift;
     }
+  }
+
+  static void goToLogin(SharedPreferences preferences, String msg) async {
+    await preferences.remove('user');
+    Get.offAll(() => AuthScreen(), transition: Transition.leftToRight);
+    Get.snackbar(
+      'Logged Out',
+      msg,
+      borderRadius: 5,
+      duration: Duration(seconds: 5),
+      backgroundColor: Colors.redAccent,
+      colorText: Colors.white,
+    );
   }
 
   static Future<bool> addStatus(WidgetRef ref, bool b) async {

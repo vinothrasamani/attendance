@@ -157,13 +157,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   ),
         ],
       ),
-      bottomNavigationBar: Container(
-        padding: EdgeInsets.all(15),
-        color: baseColor,
-        child: Text(
-          '© Attendance, All rights reserved.',
-          style: TextStyle(color: Colors.white, fontSize: 12),
-          textAlign: TextAlign.center,
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: EdgeInsets.all(15),
+          color: baseColor,
+          child: Text(
+            '© Attendance, All rights reserved.',
+            style: TextStyle(color: Colors.white, fontSize: 12),
+            textAlign: TextAlign.center,
+          ),
         ),
       ),
       body: SafeArea(

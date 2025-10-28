@@ -54,6 +54,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(HomeService.isOk.notifier).state = false;
     } finally {
       ref.read(HomeService.isChecking.notifier).state = false;
+      await HomeService.fetchCore(ref);
     }
   }
 

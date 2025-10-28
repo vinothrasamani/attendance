@@ -143,68 +143,80 @@ class ApplicationViewmodel {
   }
 
   static Future<void> submitInfo(WidgetRef ref, bool isApp) async {
-    ref.read(isLoading.notifier).state = true;
-    final myDio = dio.Dio();
-    final img = ref.read(imagePath.notifier).state;
-    final oId = ref.read(student)!.oid;
-    final data = isApp
-        ? {
-            'name': ref.read(name),
-            'dob': ref.read(dob).toIso8601String(),
-            'appNo': ref.read(appNo),
-            'gender': ref.read(gender),
-            'class': ref.read(classIs),
-            'academicYear': ref.read(academicYear),
-            'branch': ref.read(branch),
-            'prefGrp': ref.read(prefGrp),
-            'lastSchool': ref.read(lastSchool),
-            'pysicalDis': ref.read(pds),
-            if (img != null)
-              'image': await dio.MultipartFile.fromFile(
-                img,
-                filename: img.split('/').last,
-              ),
-          }
-        : {
-            'oId': oId,
-            'name': ref.read(name),
-            'dob': ref.read(dob).toIso8601String(),
-            'appNo': ref.read(appNo),
-            'adminNo': ref.read(adminNo),
-            'adminDate': ref.read(adminDate).toIso8601String(),
-            'emis': ref.read(emis),
-            'newEmis': ref.read(newEmis),
-            'staff': ref.read(staffName),
-            'aadhar': ref.read(aadhar),
-            'gender': ref.read(gender),
-            'tcNo': ref.read(tcNo),
-            'academicYear': ref.read(academicYear),
-            'branch': ref.read(branch),
-            'class': ref.read(classIs),
-            'section': ref.read(sectionIs),
-            'bloodGrp': ref.read(bgrp),
-            'identity1': ref.read(idm1),
-            'identity2': ref.read(idm2),
-            'pysicalDis': ref.read(pds),
-            if (img != null)
-              'image': await dio.MultipartFile.fromFile(img,
-                  filename: img.split('/').last),
-          };
-    print(data);
-    dio.FormData formData = dio.FormData.fromMap(data);
-    final res = await myDio
-        .post('${BaseFile.baseApiNetUrl}/store-application',
-            data: formData,
-            options: dio.Options(headers: {'Accept': 'application/json'}))
-        .catchError((err) {
-      debugPrint('Error on => ${err.toString()}');
+    try {
+      ref.read(isLoading.notifier).state = true;
+      final myDio = dio.Dio();
+      final img = ref.read(imagePath.notifier).state;
+      final oId = ref.read(student)!.oid;
+      final data = isApp
+          ? {
+              'oId': oId,
+              'name': ref.read(name),
+              'dob': ref.read(dob).toIso8601String().split('T').first,
+              'appNo': ref.read(appNo),
+              'gender': ref.read(gender),
+              'class': ref.read(classIs),
+              'academicYear': ref.read(academicYear),
+              'branch': ref.read(branch),
+              'prefGrp': ref.read(prefGrp),
+              'lastSchool': ref.read(lastSchool),
+              'pysicalDis': ref.read(pds),
+              if (img != null)
+                'image': await dio.MultipartFile.fromFile(
+                  img,
+                  filename: img.split('/').last,
+                ),
+            }
+          : {
+              'oId': oId,
+              'name': ref.read(name),
+              'dob': ref.read(dob).toIso8601String(),
+              'appNo': ref.read(appNo),
+              'adminNo': ref.read(adminNo),
+              'adminDate': ref.read(adminDate).toIso8601String(),
+              'emis': ref.read(emis),
+              'newEmis': ref.read(newEmis),
+              'staff': ref.read(staffName),
+              'aadhar': ref.read(aadhar),
+              'gender': ref.read(gender),
+              'tcNo': ref.read(tcNo),
+              'academicYear': ref.read(academicYear),
+              'branch': ref.read(branch),
+              'class': ref.read(classIs),
+              'section': ref.read(sectionIs),
+              'bloodGrp': ref.read(bgrp),
+              'identity1': ref.read(idm1),
+              'identity2': ref.read(idm2),
+              'pysicalDis': ref.read(pds),
+              if (img != null)
+                'image': await dio.MultipartFile.fromFile(img,
+                    filename: img.split('/').last),
+            };
+      print(data);
+      dio.FormData formData = dio.FormData.fromMap(data);
+      final res = await myDio.post(
+          '${BaseFile.baseApiNetUrl}/store-application',
+          data: formData,
+          options: dio.Options(headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }));
+      print('res => $res');
+      if (res.statusCode == 200) {
+        debugPrint(res.data);
+        Get.snackbar(
+          'Success!',
+          'Application created successfully!',
+          borderRadius: 5,
+          backgroundColor: const Color.fromARGB(255, 0, 124, 4),
+          colorText: Colors.white,
+        );
+      }
       ref.read(isLoading.notifier).state = false;
-      return err;
-    });
-    if (res.statusCode == 200) {
-      debugPrint(res.data);
+    } catch (e) {
+      debugPrint('Error on => $e');
+      ref.read(isLoading.notifier).state = false;
     }
-    ref.read(isLoading.notifier).state = false;
   }
 
   static void fetchCredentials(WidgetRef ref) async {

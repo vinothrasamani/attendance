@@ -1,5 +1,6 @@
 import 'package:attendance/model/credentials_model.dart';
 import 'package:attendance/view_model/application_viewmodel.dart';
+import 'package:attendance/view_model/home_service.dart';
 import 'package:attendance/widget/date_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +13,8 @@ class AcademicDetails extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final vm = ApplicationViewmodel();
+    final years = ref.watch(HomeService.years);
+    final branches = ref.watch(HomeService.branches);
     return Column(
       children: [
         Container(
@@ -36,20 +39,30 @@ class AcademicDetails extends ConsumerWidget {
               ),
               SizedBox(height: 15),
               Text('➡ Academic Year Joined'),
-              TextFormField(
-                initialValue: ref.watch(ApplicationViewmodel.academicYear),
-                validator: vm.validate,
+              DropdownButtonFormField<String>(
                 decoration: vm.decoration('Academic Year'),
+                validator: vm.validate,
+                items: years
+                    .map((item) => DropdownMenuItem<String>(
+                        value: item, child: Text(item)))
+                    .toList(),
+                borderRadius: BorderRadius.circular(10),
+                value: ref.watch(ApplicationViewmodel.academicYear),
                 onChanged: (value) => ref
                     .read(ApplicationViewmodel.academicYear.notifier)
                     .state = value,
               ),
               SizedBox(height: 15),
               Text('➡ Branch'),
-              TextFormField(
-                initialValue: ref.watch(ApplicationViewmodel.branch),
-                validator: vm.validate,
+              DropdownButtonFormField<String>(
                 decoration: vm.decoration('Branch'),
+                validator: vm.validate,
+                items: branches
+                    .map((item) => DropdownMenuItem<String>(
+                        value: item, child: Text(item)))
+                    .toList(),
+                borderRadius: BorderRadius.circular(10),
+                value: ref.watch(ApplicationViewmodel.branch),
                 onChanged: (value) => ref
                     .read(ApplicationViewmodel.branch.notifier)
                     .state = value,
