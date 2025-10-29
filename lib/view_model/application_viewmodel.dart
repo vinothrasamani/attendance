@@ -170,10 +170,11 @@ class ApplicationViewmodel {
           : {
               'oId': oId,
               'name': ref.read(name),
-              'dob': ref.read(dob).toIso8601String(),
+              'dob': ref.read(dob).toIso8601String().split('T').first,
               'appNo': ref.read(appNo),
               'adminNo': ref.read(adminNo),
-              'adminDate': ref.read(adminDate).toIso8601String(),
+              'adminDate':
+                  ref.read(adminDate).toIso8601String().split('T').first,
               'emis': ref.read(emis),
               'newEmis': ref.read(newEmis),
               'staff': ref.read(staffName),
@@ -195,7 +196,7 @@ class ApplicationViewmodel {
       print(data);
       dio.FormData formData = dio.FormData.fromMap(data);
       final res = await myDio.post(
-          '${BaseFile.baseApiNetUrl}/store-application',
+          '${BaseFile.baseApiNetUrl}/${isApp ? 'store-application' : 'store-master'}',
           data: formData,
           options: dio.Options(headers: {
             'Content-Type': 'application/json',
@@ -203,10 +204,11 @@ class ApplicationViewmodel {
           }));
       print('res => $res');
       if (res.statusCode == 200) {
-        debugPrint(res.data);
         Get.snackbar(
           'Success!',
-          'Application created successfully!',
+          isApp
+              ? 'Application created successfully!'
+              : 'Master saved successfully!',
           borderRadius: 5,
           backgroundColor: const Color.fromARGB(255, 0, 124, 4),
           colorText: Colors.white,
