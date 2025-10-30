@@ -4,9 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class StudentIdentities extends ConsumerWidget {
-  const StudentIdentities({super.key, required this.isApp, required this.pcd});
+  const StudentIdentities({
+    super.key,
+    required this.isApp,
+    required this.pcd,
+    required this.bldGrp,
+  });
   final bool isApp;
   final List<CredentialInfo> pcd;
+  final List<CredentialInfo> bldGrp;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,10 +31,19 @@ class StudentIdentities extends ConsumerWidget {
           if (!isApp) ...[
             SizedBox(height: 15),
             Text('➡ Blood Group'),
-            TextFormField(
-              initialValue: ref.watch(ApplicationViewmodel.bgrp),
+            DropdownButtonFormField<String>(
               decoration: vm.decoration('Blood Group'),
               validator: vm.validate,
+              items: bldGrp.isEmpty
+                  ? []
+                  : bldGrp
+                      .map((item) => DropdownMenuItem<String>(
+                            value: item.oid,
+                            child: Text(item.description),
+                          ))
+                      .toList(),
+              borderRadius: BorderRadius.circular(10),
+              value: ref.watch(ApplicationViewmodel.bgrp),
               onChanged: (value) =>
                   ref.read(ApplicationViewmodel.bgrp.notifier).state = value,
             ),

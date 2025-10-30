@@ -32,13 +32,15 @@ class CredentialsModel {
 }
 
 class Credentials {
-  List<CredentialInfo> dataClass, gender, phys, pGroup;
+  List<CredentialInfo> dataClass, gender, phys, pGroup, sections, blood;
 
   Credentials({
     required this.dataClass,
     required this.gender,
     required this.phys,
     required this.pGroup,
+    required this.sections,
+    required this.blood,
   });
 
   factory Credentials.fromJson(Map<String, dynamic> json) => Credentials(
@@ -50,6 +52,10 @@ class Credentials {
             json["phys"].map((x) => CredentialInfo.fromJson(x))),
         pGroup: List<CredentialInfo>.from(
             json["pGroup"].map((x) => CredentialInfo.fromJson(x))),
+        sections: List<CredentialInfo>.from(
+            json["sections"].map((x) => CredentialInfo.fromJson(x))),
+        blood: List<CredentialInfo>.from(
+            json["blood"].map((x) => CredentialInfo.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
@@ -57,6 +63,8 @@ class Credentials {
         "gender": List<dynamic>.from(gender.map((x) => x.toJson())),
         "phys": List<dynamic>.from(phys.map((x) => x.toJson())),
         "pGroup": List<dynamic>.from(pGroup.map((x) => x.toJson())),
+        "sections": List<dynamic>.from(sections.map((x) => x.toJson())),
+        "blood": List<dynamic>.from(blood.map((x) => x.toJson())),
       };
 }
 

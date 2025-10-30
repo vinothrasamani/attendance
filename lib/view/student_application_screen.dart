@@ -153,10 +153,9 @@ class _StudentApplicationScreenState
                         if (widget.isApp) Divider(),
                         const SizedBox(height: 10),
                         PersonalDetails(
-                          isApp: widget.isApp,
-                          genders:
-                              credentials != null ? credentials.gender : [],
-                        ),
+                            isApp: widget.isApp,
+                            genders:
+                                credentials != null ? credentials.gender : []),
                         const SizedBox(height: 10),
                         AcademicDetails(
                             isApp: widget.isApp, cInfo: credentials),
@@ -164,6 +163,7 @@ class _StudentApplicationScreenState
                         StudentIdentities(
                           isApp: widget.isApp,
                           pcd: credentials != null ? credentials.phys : [],
+                          bldGrp: credentials != null ? credentials.blood : [],
                         ),
                       ],
                     ),

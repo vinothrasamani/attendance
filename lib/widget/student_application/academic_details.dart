@@ -27,16 +27,19 @@ class AcademicDetails extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               vm.title('Academic Details', Icons.school),
-              SizedBox(height: 15),
-              Text('➡ Application No'),
-              TextFormField(
-                initialValue: ref.watch(ApplicationViewmodel.appNo),
-                validator: vm.validate,
-                keyboardType: TextInputType.number,
-                decoration: vm.decoration('Application No'),
-                onChanged: (value) =>
-                    ref.read(ApplicationViewmodel.appNo.notifier).state = value,
-              ),
+              if (isApp) ...[
+                SizedBox(height: 15),
+                Text('➡ Application No'),
+                TextFormField(
+                  initialValue: ref.watch(ApplicationViewmodel.appNo),
+                  validator: vm.validate,
+                  keyboardType: TextInputType.number,
+                  decoration: vm.decoration('Application No'),
+                  onChanged: (value) => ref
+                      .read(ApplicationViewmodel.appNo.notifier)
+                      .state = value,
+                ),
+              ],
               SizedBox(height: 15),
               Text('➡ Academic Year Joined'),
               DropdownButtonFormField<String>(
@@ -76,9 +79,7 @@ class AcademicDetails extends ConsumerWidget {
                     ? []
                     : cInfo!.dataClass
                         .map((item) => DropdownMenuItem<String>(
-                              value: item.oid,
-                              child: Text(item.description),
-                            ))
+                            value: item.oid, child: Text(item.description)))
                         .toList(),
                 borderRadius: BorderRadius.circular(10),
                 value: ref.watch(ApplicationViewmodel.classIs),
@@ -96,9 +97,7 @@ class AcademicDetails extends ConsumerWidget {
                       ? []
                       : cInfo!.pGroup
                           .map((item) => DropdownMenuItem<String>(
-                                value: item.oid,
-                                child: Text(item.description),
-                              ))
+                              value: item.oid, child: Text(item.description)))
                           .toList(),
                   borderRadius: BorderRadius.circular(10),
                   value: ref.watch(ApplicationViewmodel.prefGrp),
@@ -107,7 +106,7 @@ class AcademicDetails extends ConsumerWidget {
                       .state = value,
                 ),
                 SizedBox(height: 15),
-                Text('➡ Previous school studied'),
+                Text('➡ Previous school'),
                 TextFormField(
                   initialValue: ref.watch(ApplicationViewmodel.lastSchool),
                   decoration: vm.decoration('Preivous School'),
@@ -119,10 +118,17 @@ class AcademicDetails extends ConsumerWidget {
               if (!isApp) ...[
                 SizedBox(height: 15),
                 Text('➡ Section Joined'),
-                TextFormField(
-                  initialValue: ref.watch(ApplicationViewmodel.sectionIs),
-                  validator: vm.validate,
+                DropdownButtonFormField<String>(
                   decoration: vm.decoration('Section'),
+                  validator: vm.validate,
+                  items: cInfo == null || cInfo!.sections.isEmpty
+                      ? []
+                      : cInfo!.sections
+                          .map((item) => DropdownMenuItem<String>(
+                              value: item.oid, child: Text(item.description)))
+                          .toList(),
+                  borderRadius: BorderRadius.circular(10),
+                  value: ref.watch(ApplicationViewmodel.sectionIs),
                   onChanged: (value) => ref
                       .read(ApplicationViewmodel.sectionIs.notifier)
                       .state = value,
@@ -172,10 +178,27 @@ class AcademicDetails extends ConsumerWidget {
                   },
                 ),
                 SizedBox(height: 15),
+                Text('➡ PEN No'),
+                TextFormField(
+                  initialValue: ref.watch(ApplicationViewmodel.penNo),
+                  decoration: vm.decoration('PEN No'),
+                  onChanged: (value) => ref
+                      .read(ApplicationViewmodel.penNo.notifier)
+                      .state = value,
+                ),
+                SizedBox(height: 15),
+                Text('➡ Apaar Id'),
+                TextFormField(
+                  initialValue: ref.watch(ApplicationViewmodel.apaarId),
+                  decoration: vm.decoration('Apaar Id'),
+                  onChanged: (value) => ref
+                      .read(ApplicationViewmodel.apaarId.notifier)
+                      .state = value,
+                ),
+                SizedBox(height: 15),
                 Text('➡ EMIS No'),
                 TextFormField(
                   initialValue: ref.watch(ApplicationViewmodel.emis),
-                  validator: vm.validate,
                   keyboardType: TextInputType.number,
                   decoration: vm.decoration('EMIS'),
                   onChanged: (value) => ref
@@ -210,6 +233,123 @@ class AcademicDetails extends ConsumerWidget {
                       .read(ApplicationViewmodel.staffName.notifier)
                       .state = value,
                 ),
+              ],
+            ),
+          ),
+        SizedBox(height: 10),
+        if (!isApp)
+          Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              color: Colors.grey.withAlpha(40),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                vm.title('Additional Info', Icons.info_outline),
+                SizedBox(height: 15),
+                Text('➡ Optional Subject'),
+                DropdownButtonFormField<String>(
+                  decoration: vm.decoration('Choose..'),
+                  items: []
+                      .map((item) => DropdownMenuItem<String>(
+                          value: item, child: Text(item)))
+                      .toList(),
+                  borderRadius: BorderRadius.circular(10),
+                  value: ref.watch(ApplicationViewmodel.oplSub),
+                  onChanged: (value) => ref
+                      .read(ApplicationViewmodel.oplSub.notifier)
+                      .state = value,
+                ),
+                SizedBox(height: 15),
+                Text('➡ School Id'),
+                DropdownButtonFormField<String>(
+                  decoration: vm.decoration('Choose..'),
+                  items: []
+                      .map((item) => DropdownMenuItem<String>(
+                          value: item, child: Text(item)))
+                      .toList(),
+                  borderRadius: BorderRadius.circular(10),
+                  value: ref.watch(ApplicationViewmodel.schlId),
+                  onChanged: (value) => ref
+                      .read(ApplicationViewmodel.schlId.notifier)
+                      .state = value,
+                ),
+                SizedBox(height: 15),
+                Text('➡ Current Academic Year'),
+                DropdownButtonFormField<String>(
+                  decoration: vm.decoration('Choose..'),
+                  items: []
+                      .map((item) => DropdownMenuItem<String>(
+                          value: item, child: Text(item)))
+                      .toList(),
+                  borderRadius: BorderRadius.circular(10),
+                  value: ref.watch(ApplicationViewmodel.currAcaYear),
+                  onChanged: (value) => ref
+                      .read(ApplicationViewmodel.currAcaYear.notifier)
+                      .state = value,
+                ),
+                SizedBox(height: 15),
+                Text('➡ Section Group'),
+                DropdownButtonFormField<String>(
+                  decoration: vm.decoration('Choose..'),
+                  items: []
+                      .map((item) => DropdownMenuItem<String>(
+                          value: item, child: Text(item)))
+                      .toList(),
+                  borderRadius: BorderRadius.circular(10),
+                  value: ref.watch(ApplicationViewmodel.secGrp),
+                  onChanged: (value) => ref
+                      .read(ApplicationViewmodel.secGrp.notifier)
+                      .state = value,
+                ),
+                SizedBox(height: 15),
+                Text('➡ Status'),
+                DropdownButtonFormField<String>(
+                  decoration: vm.decoration('Choose..'),
+                  items: []
+                      .map((item) => DropdownMenuItem<String>(
+                          value: item, child: Text(item)))
+                      .toList(),
+                  borderRadius: BorderRadius.circular(10),
+                  value: ref.watch(ApplicationViewmodel.status),
+                  onChanged: (value) => ref
+                      .read(ApplicationViewmodel.status.notifier)
+                      .state = value,
+                ),
+                SizedBox(height: 15),
+                Text('➡ Who is working'),
+                DropdownButtonFormField<String>(
+                  decoration: vm.decoration('Choose..'),
+                  items: ['Father', 'Mother']
+                      .map((item) => DropdownMenuItem<String>(
+                          value: item, child: Text(item)))
+                      .toList(),
+                  borderRadius: BorderRadius.circular(10),
+                  value: ref.watch(ApplicationViewmodel.whoWork),
+                  onChanged: (value) => ref
+                      .read(ApplicationViewmodel.whoWork.notifier)
+                      .state = value,
+                ),
+                SizedBox(height: 15),
+                CheckboxListTile(
+                    title: Text('Birth Certificate'),
+                    value: ref.watch(ApplicationViewmodel.birthCert),
+                    onChanged: (val) => val != null
+                        ? ref
+                            .read(ApplicationViewmodel.birthCert.notifier)
+                            .state = val
+                        : null),
+                SizedBox(height: 15),
+                CheckboxListTile(
+                    title: Text('Transfer Certificate'),
+                    value: ref.watch(ApplicationViewmodel.transCert),
+                    onChanged: (val) => val != null
+                        ? ref
+                            .read(ApplicationViewmodel.transCert.notifier)
+                            .state = val
+                        : null),
               ],
             ),
           ),

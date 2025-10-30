@@ -30,6 +30,16 @@ class ApplicationViewmodel {
   static final idm2 = StateProvider.autoDispose<String?>((ref) => null);
   static final pds = StateProvider.autoDispose<String?>((ref) => null);
   static final imagePath = StateProvider.autoDispose<String?>((ref) => null);
+  static final oplSub = StateProvider.autoDispose<String?>((ref) => null);
+  static final penNo = StateProvider.autoDispose<String?>((ref) => null);
+  static final apaarId = StateProvider.autoDispose<String?>((ref) => null);
+  static final schlId = StateProvider.autoDispose<String?>((ref) => null);
+  static final currAcaYear = StateProvider.autoDispose<String?>((ref) => null);
+  static final secGrp = StateProvider.autoDispose<String?>((ref) => null);
+  static final status = StateProvider.autoDispose<String?>((ref) => null);
+  static final whoWork = StateProvider.autoDispose<String?>((ref) => null);
+  static final birthCert = StateProvider.autoDispose<bool>((ref) => false);
+  static final transCert = StateProvider.autoDispose<bool>((ref) => false);
   static final dob =
       StateProvider.autoDispose<DateTime>((ref) => DateTime.now());
   static final adminDate =
@@ -169,9 +179,6 @@ class ApplicationViewmodel {
             }
           : {
               'oId': oId,
-              'name': ref.read(name),
-              'dob': ref.read(dob).toIso8601String().split('T').first,
-              'appNo': ref.read(appNo),
               'adminNo': ref.read(adminNo),
               'adminDate':
                   ref.read(adminDate).toIso8601String().split('T').first,
@@ -179,7 +186,16 @@ class ApplicationViewmodel {
               'newEmis': ref.read(newEmis),
               'staff': ref.read(staffName),
               'aadhar': ref.read(aadhar),
-              'gender': ref.read(gender),
+              'oplSub': ref.read(oplSub),
+              'penNo': ref.read(penNo),
+              'apaarId': ref.read(apaarId),
+              'schoolId': ref.read(schlId),
+              'curAcadYear': ref.read(currAcaYear),
+              'secGrp': ref.read(secGrp),
+              'status': ref.read(status),
+              'BCert': ref.read(birthCert) ? 1 : 0,
+              'TCert': ref.read(transCert) ? 1 : 0,
+              'whoWork': ref.read(whoWork),
               'tcNo': ref.read(tcNo),
               'academicYear': ref.read(academicYear),
               'branch': ref.read(branch),
