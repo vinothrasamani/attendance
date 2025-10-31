@@ -72,10 +72,30 @@ class _StudentApplicationScreenState
     final isLoading = ref.watch(ApplicationViewmodel.isLoading);
     final student = ref.watch(ApplicationViewmodel.student);
     final credentials = ref.watch(ApplicationViewmodel.credentials);
+    final edit = ref.watch(ApplicationViewmodel.oIdForEdit);
 
     return Scaffold(
       appBar: AppBar(
-          title: Text(widget.isApp ? 'Student Application' : 'Student Master')),
+        title: Text(widget.isApp ? 'Student Application' : 'Student Master'),
+        actions: [
+          if (!widget.isApp && student != null)
+            if (edit == null || edit.isEmpty)
+              IconButton.filledTonal(
+                onPressed: edit == null
+                    ? () {
+                        ApplicationViewmodel.fetchMasterInfo(ref, student.oid);
+                      }
+                    : null,
+                icon: edit == null
+                    ? Icon(Icons.edit)
+                    : SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+              ),
+        ],
+      ),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
@@ -105,7 +125,9 @@ class _StudentApplicationScreenState
                   )
                 : Text(
                     student != null
-                        ? 'Save Application'
+                        ? widget.isApp
+                            ? 'Save Application'
+                            : 'Save Master'
                         : widget.isApp
                             ? 'Search Sibilings'
                             : 'Search Application',

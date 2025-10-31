@@ -1,6 +1,7 @@
 import 'package:attendance/base_file.dart';
 import 'package:attendance/main.dart';
 import 'package:attendance/model/credentials_model.dart';
+import 'package:attendance/model/student_master_model.dart';
 import 'package:attendance/model/student_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,7 +14,6 @@ class ApplicationViewmodel {
   static final name = StateProvider.autoDispose<String?>((ref) => null);
   static final emis = StateProvider.autoDispose<String?>((ref) => null);
   static final newEmis = StateProvider.autoDispose<String?>((ref) => null);
-  static final staffName = StateProvider.autoDispose<String?>((ref) => null);
   static final aadhar = StateProvider.autoDispose<String?>((ref) => null);
   static final gender = StateProvider.autoDispose<String?>((ref) => null);
   static final tcNo = StateProvider.autoDispose<String?>((ref) => null);
@@ -48,6 +48,7 @@ class ApplicationViewmodel {
   static final student = StateProvider.autoDispose<StudentData?>((ref) => null);
   static final credentials =
       StateProvider.autoDispose<Credentials?>((ref) => null);
+  static final oIdForEdit = StateProvider.autoDispose<String?>((ref) => null);
 
   Widget title(String txt, IconData icon) {
     return Row(
@@ -184,7 +185,6 @@ class ApplicationViewmodel {
                   ref.read(adminDate).toIso8601String().split('T').first,
               'emis': ref.read(emis),
               'newEmis': ref.read(newEmis),
-              'staff': ref.read(staffName),
               'aadhar': ref.read(aadhar),
               'oplSub': ref.read(oplSub),
               'penNo': ref.read(penNo),
@@ -231,6 +231,7 @@ class ApplicationViewmodel {
         );
       }
       ref.read(isLoading.notifier).state = false;
+      Get.back();
     } catch (e) {
       debugPrint('Error on => $e');
       ref.read(isLoading.notifier).state = false;
@@ -238,9 +239,7 @@ class ApplicationViewmodel {
   }
 
   static void fetchCredentials(WidgetRef ref) async {
-    final ip = ref.read(BaseFile.ip);
-    final port = ref.read(BaseFile.port);
-    final res = await BaseFile.getMethod('credentials', ip, port,
+    final res = await BaseFile.getMethod('credentials', '', 0,
         appUrl: BaseFile.baseApiNetUrl);
     final data = credentialsModelFromJson(res);
     if (data.success) {
@@ -250,10 +249,8 @@ class ApplicationViewmodel {
 
   static void fetchApplication(WidgetRef ref, String no) async {
     ref.read(isLoading.notifier).state = true;
-    final ip = ref.read(BaseFile.ip);
-    final port = ref.read(BaseFile.port);
     final res = await BaseFile.postMethod(
-        'student-application', {"appNo": no}, ip, port,
+        'student-application', {"appNo": no}, '', 0,
         appUrl: BaseFile.baseApiNetUrl);
     final data = sibilingModelFromJson(res);
     if (data.success) {
@@ -268,5 +265,53 @@ class ApplicationViewmodel {
       );
     }
     ref.read(isLoading.notifier).state = false;
+  }
+
+  static void fetchMasterInfo(WidgetRef ref, String oId) async {
+    try {
+      ref.read(oIdForEdit.notifier).state = '';
+      final res = await BaseFile.getMethod('fetch-master/$oId', '', 0,
+          appUrl: BaseFile.baseApiNetUrl);
+      final data = studentMasterModelFromJson(res);
+      if (data.success) {
+        final info = data.data!;
+        ref.read(adminNo.notifier).state = info.admissionNo;
+        ref.read(adminDate.notifier).state = info.admnDate;
+        ref.read(emis.notifier).state = info.emis;
+        ref.read(newEmis.notifier).state = info.newEmis;
+        ref.read(aadhar.notifier).state = info.aadharNo;
+        ref.read(oplSub.notifier).state = info.optionalSubject;
+        ref.read(penNo.notifier).state = info.penNo;
+        ref.read(apaarId.notifier).state = info.apaarId;
+        ref.read(schlId.notifier).state = info.schoolId;
+        ref.read(currAcaYear.notifier).state = info.currentAcademicYear;
+        ref.read(secGrp.notifier).state = info.sectionGroup;
+        ref.read(status.notifier).state = info.status;
+        ref.read(birthCert.notifier).state = info.birthCertificate == 1;
+        ref.read(transCert.notifier).state = info.transferCertificate == 1;
+        ref.read(whoWork.notifier).state = info.whoisWorking;
+        ref.read(tcNo.notifier).state = info.tcNo;
+        ref.read(academicYear.notifier).state = info.academicYearJoined;
+        ref.read(branch.notifier).state = info.branch;
+        ref.read(classIs.notifier).state = info.className;
+        ref.read(sectionIs.notifier).state = info.sectionJoined;
+        ref.read(bgrp.notifier).state = info.bloodGroup;
+        ref.read(idm1.notifier).state = info.indentificationMark1;
+        ref.read(idm2.notifier).state = info.indentificationMark2;
+        ref.read(pds.notifier).state = info.physicalDisability;
+        ref.read(oIdForEdit.notifier).state = info.oid;
+      } else {
+        ref.read(oIdForEdit.notifier).state = null;
+        Get.snackbar(
+          'Failed!',
+          'No master found to edit!',
+          borderRadius: 5,
+          backgroundColor: Colors.redAccent,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      ref.read(oIdForEdit.notifier).state = null;
+    }
   }
 }

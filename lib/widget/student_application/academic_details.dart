@@ -224,15 +224,6 @@ class AcademicDetails extends ConsumerWidget {
                       .read(ApplicationViewmodel.tcNo.notifier)
                       .state = value,
                 ),
-                SizedBox(height: 15),
-                Text('➡ staff Name'),
-                TextFormField(
-                  initialValue: ref.watch(ApplicationViewmodel.staffName),
-                  decoration: vm.decoration('Statff Name'),
-                  onChanged: (value) => ref
-                      .read(ApplicationViewmodel.staffName.notifier)
-                      .state = value,
-                ),
               ],
             ),
           ),
