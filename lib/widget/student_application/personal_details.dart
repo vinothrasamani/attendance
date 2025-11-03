@@ -7,15 +7,41 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:attendance/widget/date_field.dart';
 
-class PersonalDetails extends ConsumerWidget {
+class PersonalDetails extends ConsumerStatefulWidget {
   const PersonalDetails(
       {super.key, required this.isApp, required this.genders});
   final bool isApp;
   final List<CredentialInfo> genders;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PersonalDetails> createState() => _PersonalDetailsState();
+}
+
+class _PersonalDetailsState extends ConsumerState<PersonalDetails> {
+  late TextEditingController nameController;
+  late TextEditingController aadharController;
+
+  @override
+  void initState() {
+    super.initState();
+    nameController = TextEditingController();
+    aadharController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    aadharController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final vm = ApplicationViewmodel();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      nameController.text = ref.watch(ApplicationViewmodel.name) ?? '';
+      aadharController.text = ref.watch(ApplicationViewmodel.aadhar) ?? '';
+    });
     return Container(
       padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
@@ -26,11 +52,11 @@ class PersonalDetails extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           vm.title('Personal Details', Icons.person),
-          if (isApp) ...[
+          if (widget.isApp) ...[
             SizedBox(height: 15),
             Text('➡ Student Name'),
             TextFormField(
-              initialValue: ref.watch(ApplicationViewmodel.name),
+              controller: nameController,
               decoration: vm.decoration('Student Name'),
               validator: vm.validate,
               onChanged: (value) =>
@@ -57,9 +83,9 @@ class PersonalDetails extends ConsumerWidget {
             DropdownButtonFormField<String>(
               decoration: vm.decoration('Gender'),
               validator: vm.validate,
-              items: genders.isEmpty
+              items: widget.genders.isEmpty
                   ? []
-                  : genders
+                  : widget.genders
                       .map((item) => DropdownMenuItem<String>(
                             value: item.oid,
                             child: Text(item.description),
@@ -71,11 +97,11 @@ class PersonalDetails extends ConsumerWidget {
                   ref.read(ApplicationViewmodel.gender.notifier).state = value,
             ),
           ],
-          if (!isApp) ...[
+          if (!widget.isApp) ...[
             SizedBox(height: 15),
             Text('➡ Addhar No'),
             TextFormField(
-              initialValue: ref.watch(ApplicationViewmodel.aadhar),
+              controller: aadharController,
               decoration: vm.decoration('Addhar'),
               validator: vm.validate,
               keyboardType: TextInputType.number,
@@ -87,6 +113,10 @@ class PersonalDetails extends ConsumerWidget {
           Text('➡ Student Photo'),
           Builder(builder: (context) {
             final img = ref.watch(ApplicationViewmodel.imagePath);
+            final edit = ref.watch(ApplicationViewmodel.oIdForEdit);
+            if (edit != null && edit.isEmpty) {
+              return LinearProgressIndicator();
+            }
             return GestureDetector(
               onTap: () async {
                 await vm.pickImage(ref);

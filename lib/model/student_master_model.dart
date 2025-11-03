@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 StudentMasterModel studentMasterModelFromJson(String str) =>
     StudentMasterModel.fromJson(json.decode(str));
@@ -8,13 +10,13 @@ String studentMasterModelToJson(StudentMasterModel data) =>
 
 class StudentMasterModel {
   bool success;
-  String message;
+  String? message;
   StudentMasterData? data;
 
   StudentMasterModel({
     required this.success,
-    required this.message,
-    required this.data,
+    this.message,
+    this.data,
   });
 
   factory StudentMasterModel.fromJson(Map<String, dynamic> json) =>
@@ -34,13 +36,13 @@ class StudentMasterModel {
 }
 
 class StudentMasterData {
-  String oid;
+  String? oid;
   String? sequentialNumber;
-  String admissionNo;
+  String? admissionNo;
   DateTime admnDate;
-  String applicationNo;
+  String? applicationNo;
   String? medium;
-  String classJoined;
+  String? classJoined;
   String? sectionJoined;
   String? optionalSubject;
   String? bloodGroup;
@@ -59,7 +61,8 @@ class StudentMasterData {
   String? transport;
   String? busStopName;
   String? dataInput;
-  String? photo;
+  String? photo; // Will hold the saved file path
+  String? photoBase64; // Store the base64 string
   String? imageFileName;
   String? sectionGroup;
   String? status;
@@ -69,10 +72,10 @@ class StudentMasterData {
   String? tamilStudentName;
   String? userInput;
   String? aadharNo;
-  String emis;
+  String? emis;
   String? persistentColor;
   String? tcNo;
-  String? whoisWorking;
+  int? whoisWorking;
   String? rationCardNo;
   String? className;
   String? onlinePayment;
@@ -91,13 +94,13 @@ class StudentMasterData {
   String? apaarId;
 
   StudentMasterData({
-    required this.oid,
+    this.oid,
     this.sequentialNumber,
-    required this.admissionNo,
+    this.admissionNo,
     required this.admnDate,
-    required this.applicationNo,
+    this.applicationNo,
     this.medium,
-    required this.classJoined,
+    this.classJoined,
     this.sectionJoined,
     this.optionalSubject,
     this.bloodGroup,
@@ -117,6 +120,7 @@ class StudentMasterData {
     this.busStopName,
     this.dataInput,
     this.photo,
+    this.photoBase64,
     this.imageFileName,
     this.sectionGroup,
     this.status,
@@ -126,7 +130,7 @@ class StudentMasterData {
     this.tamilStudentName,
     this.userInput,
     this.aadharNo,
-    required this.emis,
+    this.emis,
     this.persistentColor,
     this.tcNo,
     this.whoisWorking,
@@ -148,64 +152,87 @@ class StudentMasterData {
     this.apaarId,
   });
 
-  factory StudentMasterData.fromJson(Map<String, dynamic> json) =>
-      StudentMasterData(
-        oid: json["Oid"],
-        sequentialNumber: json["SequentialNumber"],
-        admissionNo: json["AdmissionNo"],
-        admnDate: DateTime.parse(json["AdmnDate"]),
-        applicationNo: json["ApplicationNo"],
-        medium: json["Medium"],
-        classJoined: json["ClassJoined"],
-        sectionJoined: json["SectionJoined"],
-        optionalSubject: json["OptionalSubject"],
-        bloodGroup: json["BloodGroup"],
-        indentificationMark1: json["IndentificationMark1"],
-        indentificationMark2: json["IndentificationMark2"],
-        physicalDisability: json["PhysicalDisability"],
-        doctorName: json["DoctorName"],
-        doctorAddress: json["DoctorAddress"],
-        doctorPhoneNo: json["DoctorPhoneNo"],
-        hostel: json["Hostel"],
-        academicYearJoined: json["AcademicYearJoined"],
-        schoolId: json["SchoolId"],
-        currentAcademicYear: json["CurrentAcademicYear"],
-        optimisticLockField: json["OptimisticLockField"],
-        gcRecord: json["GCRecord"],
-        transport: json["Transport"],
-        busStopName: json["BusStopName"],
-        dataInput: json["DataInput"],
-        photo: json["Photo"],
-        imageFileName: json["ImageFileName"],
-        sectionGroup: json["SectionGroup"],
-        status: json["Status"],
-        transferCertificate: json["TransferCertificate"],
-        birthCertificate: json["BirthCertificate"],
-        rulesAndRegulations: json["RulesAndRegulations"],
-        tamilStudentName: json["TamilStudentName"],
-        userInput: json["UserInput"],
-        aadharNo: json["AadharNo"],
-        emis: json["EMIS"],
-        persistentColor: json["PersistentColor"],
-        tcNo: json["TCNo"],
-        whoisWorking: json["WhoisWorking"],
-        rationCardNo: json["RationCardNo"],
-        className: json["ClassName"],
-        onlinePayment: json["OnlinePayment"],
-        userName: json["UserName"],
-        password: json["Password"],
-        active: json["Active"],
-        mobileNo: json["MobileNo"],
-        email: json["Email"],
-        message: json["Message"],
-        tempAdmNo: json["TempAdmNo"],
-        newEmis: json["NewEMIS"],
-        branch: json["Branch"],
-        penNo: json["PENNo"],
-        fixedDeposit: json["FixedDeposit"],
-        fixedDepositAmount: json["FixedDepositAmount"]?.toString(),
-        apaarId: json["ApaarID"],
-      );
+  factory StudentMasterData.fromJson(Map<String, dynamic> json) {
+    return StudentMasterData(
+      oid: json["Oid"],
+      sequentialNumber: json["SequentialNumber"],
+      admissionNo: json["AdmissionNo"],
+      admnDate: json["AdmnDate"] == null
+          ? DateTime.now()
+          : DateTime.parse(json["AdmnDate"]),
+      applicationNo: json["ApplicationNo"],
+      medium: json["Medium"],
+      classJoined: json["ClassJoined"],
+      sectionJoined: json["SectionJoined"],
+      optionalSubject: json["OptionalSubject"],
+      bloodGroup: json["BloodGroup"],
+      indentificationMark1: json["IndentificationMark1"],
+      indentificationMark2: json["IndentificationMark2"],
+      physicalDisability: json["PhysicalDisability"],
+      doctorName: json["DoctorName"],
+      doctorAddress: json["DoctorAddress"],
+      doctorPhoneNo: json["DoctorPhoneNo"],
+      hostel: json["Hostel"],
+      academicYearJoined: json["AcademicYearJoined"],
+      schoolId: json["SchoolId"],
+      currentAcademicYear: json["CurrentAcademicYear"],
+      optimisticLockField: json["OptimisticLockField"],
+      gcRecord: json["GCRecord"],
+      transport: json["Transport"],
+      busStopName: json["BusStopName"],
+      dataInput: json["DataInput"],
+      photoBase64: json["Photo"], // Store base64 string
+      imageFileName: json["ImageFileName"],
+      sectionGroup: json["SectionGroup"],
+      status: json["Status"],
+      transferCertificate: json["TransferCertificate"] == '1' ? 1 : 0,
+      birthCertificate: json["BirthCertificate"] == '1' ? 1 : 0,
+      rulesAndRegulations: json["RulesAndRegulations"],
+      tamilStudentName: json["TamilStudentName"],
+      userInput: json["UserInput"],
+      aadharNo: json["AadharNo"],
+      emis: json["EMIS"],
+      persistentColor: json["PersistentColor"],
+      tcNo: json["TCNo"],
+      whoisWorking: int.tryParse(json["WhoisWorking"]?.toString() ?? '0'),
+      rationCardNo: json["RationCardNo"],
+      className: json["ClassName"],
+      onlinePayment: json["OnlinePayment"],
+      userName: json["UserName"],
+      password: json["Password"],
+      active: json["Active"],
+      mobileNo: json["MobileNo"],
+      email: json["Email"],
+      message: json["Message"],
+      tempAdmNo: json["TempAdmNo"],
+      newEmis: json["NewEMIS"],
+      branch: json["Branch"],
+      penNo: json["PENNo"],
+      fixedDeposit: json["FixedDeposit"],
+      fixedDepositAmount: json["FixedDepositAmount"]?.toString(),
+      apaarId: json["ApaarID"],
+    );
+  }
+
+  Future<void> loadPhoto() async {
+    if (photoBase64 != null && photoBase64!.isNotEmpty) {
+      photo = await _savePhotoToTemp(photoBase64!);
+    }
+  }
+
+  static Future<String> _savePhotoToTemp(String base64Str) async {
+    try {
+      final bytes = base64Decode(base64Str);
+      final tempDir = await getTemporaryDirectory();
+      final filePath =
+          '${tempDir.path}/student_photo_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final file = File(filePath);
+      await file.writeAsBytes(bytes);
+      return file.path;
+    } catch (e) {
+      return '';
+    }
+  }
 
   Map<String, dynamic> toJson() => {
         "Oid": oid,
@@ -233,7 +260,7 @@ class StudentMasterData {
         "Transport": transport,
         "BusStopName": busStopName,
         "DataInput": dataInput,
-        "Photo": photo,
+        "Photo": photoBase64,
         "ImageFileName": imageFileName,
         "SectionGroup": sectionGroup,
         "Status": status,

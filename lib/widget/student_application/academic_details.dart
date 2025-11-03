@@ -5,16 +5,72 @@ import 'package:attendance/widget/date_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AcademicDetails extends ConsumerWidget {
+class AcademicDetails extends ConsumerStatefulWidget {
   const AcademicDetails({super.key, required this.isApp, required this.cInfo});
   final bool isApp;
   final Credentials? cInfo;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AcademicDetails> createState() => _AcademicDetailsState();
+}
+
+class _AcademicDetailsState extends ConsumerState<AcademicDetails> {
+  // Text editing controllers
+  late TextEditingController appNoController;
+  late TextEditingController lastSchoolController;
+  late TextEditingController adminNoController;
+  late TextEditingController penNoController;
+  late TextEditingController apaarIdController;
+  late TextEditingController emisController;
+  late TextEditingController newEmisController;
+  late TextEditingController tcNoController;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize controllers
+    appNoController = TextEditingController();
+    lastSchoolController = TextEditingController();
+    adminNoController = TextEditingController();
+    penNoController = TextEditingController();
+    apaarIdController = TextEditingController();
+    emisController = TextEditingController();
+    newEmisController = TextEditingController();
+    tcNoController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    // Dispose controllers
+    appNoController.dispose();
+    lastSchoolController.dispose();
+    adminNoController.dispose();
+    penNoController.dispose();
+    apaarIdController.dispose();
+    emisController.dispose();
+    newEmisController.dispose();
+    tcNoController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final vm = ApplicationViewmodel();
     final years = ref.watch(HomeService.years);
     final branches = ref.watch(HomeService.branches);
+    final work = ['Father', 'Mother'];
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      appNoController.text = ref.watch(ApplicationViewmodel.appNo) ?? '';
+      lastSchoolController.text =
+          ref.watch(ApplicationViewmodel.lastSchool) ?? '';
+      adminNoController.text = ref.watch(ApplicationViewmodel.adminNo) ?? '';
+      penNoController.text = ref.watch(ApplicationViewmodel.penNo) ?? '';
+      apaarIdController.text = ref.watch(ApplicationViewmodel.apaarId) ?? '';
+      emisController.text = ref.watch(ApplicationViewmodel.emis) ?? '';
+      newEmisController.text = ref.watch(ApplicationViewmodel.newEmis) ?? '';
+      tcNoController.text = ref.watch(ApplicationViewmodel.tcNo) ?? '';
+    });
     return Column(
       children: [
         Container(
@@ -27,11 +83,11 @@ class AcademicDetails extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               vm.title('Academic Details', Icons.school),
-              if (isApp) ...[
+              if (widget.isApp) ...[
                 SizedBox(height: 15),
                 Text('➡ Application No'),
                 TextFormField(
-                  initialValue: ref.watch(ApplicationViewmodel.appNo),
+                  controller: appNoController,
                   validator: vm.validate,
                   keyboardType: TextInputType.number,
                   decoration: vm.decoration('Application No'),
@@ -75,9 +131,9 @@ class AcademicDetails extends ConsumerWidget {
               DropdownButtonFormField<String>(
                 decoration: vm.decoration('Class'),
                 validator: vm.validate,
-                items: cInfo == null || cInfo!.dataClass.isEmpty
+                items: widget.cInfo == null || widget.cInfo!.dataClass.isEmpty
                     ? []
-                    : cInfo!.dataClass
+                    : widget.cInfo!.dataClass
                         .map((item) => DropdownMenuItem<String>(
                             value: item.oid, child: Text(item.description)))
                         .toList(),
@@ -87,15 +143,15 @@ class AcademicDetails extends ConsumerWidget {
                     .read(ApplicationViewmodel.classIs.notifier)
                     .state = value,
               ),
-              if (isApp) ...[
+              if (widget.isApp) ...[
                 SizedBox(height: 15),
                 Text('➡ Preffered Group'),
                 DropdownButtonFormField<String>(
                   decoration: vm.decoration('Group'),
                   validator: vm.validate,
-                  items: cInfo == null || cInfo!.pGroup.isEmpty
+                  items: widget.cInfo == null || widget.cInfo!.pGroup.isEmpty
                       ? []
-                      : cInfo!.pGroup
+                      : widget.cInfo!.pGroup
                           .map((item) => DropdownMenuItem<String>(
                               value: item.oid, child: Text(item.description)))
                           .toList(),
@@ -108,22 +164,22 @@ class AcademicDetails extends ConsumerWidget {
                 SizedBox(height: 15),
                 Text('➡ Previous school'),
                 TextFormField(
-                  initialValue: ref.watch(ApplicationViewmodel.lastSchool),
+                  controller: lastSchoolController,
                   decoration: vm.decoration('Preivous School'),
                   onChanged: (value) => ref
                       .read(ApplicationViewmodel.lastSchool.notifier)
                       .state = value,
                 ),
               ],
-              if (!isApp) ...[
+              if (!widget.isApp) ...[
                 SizedBox(height: 15),
                 Text('➡ Section Joined'),
                 DropdownButtonFormField<String>(
                   decoration: vm.decoration('Section'),
                   validator: vm.validate,
-                  items: cInfo == null || cInfo!.sections.isEmpty
+                  items: widget.cInfo == null || widget.cInfo!.sections.isEmpty
                       ? []
-                      : cInfo!.sections
+                      : widget.cInfo!.sections
                           .map((item) => DropdownMenuItem<String>(
                               value: item.oid, child: Text(item.description)))
                           .toList(),
@@ -138,7 +194,7 @@ class AcademicDetails extends ConsumerWidget {
           ),
         ),
         SizedBox(height: 10),
-        if (!isApp)
+        if (!widget.isApp)
           Container(
             padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
@@ -152,7 +208,7 @@ class AcademicDetails extends ConsumerWidget {
                 SizedBox(height: 15),
                 Text('➡ Admission No'),
                 TextFormField(
-                  initialValue: ref.watch(ApplicationViewmodel.adminNo),
+                  controller: adminNoController,
                   validator: vm.validate,
                   keyboardType: TextInputType.number,
                   decoration: vm.decoration('Admin No'),
@@ -180,7 +236,7 @@ class AcademicDetails extends ConsumerWidget {
                 SizedBox(height: 15),
                 Text('➡ PEN No'),
                 TextFormField(
-                  initialValue: ref.watch(ApplicationViewmodel.penNo),
+                  controller: penNoController,
                   decoration: vm.decoration('PEN No'),
                   onChanged: (value) => ref
                       .read(ApplicationViewmodel.penNo.notifier)
@@ -189,7 +245,7 @@ class AcademicDetails extends ConsumerWidget {
                 SizedBox(height: 15),
                 Text('➡ Apaar Id'),
                 TextFormField(
-                  initialValue: ref.watch(ApplicationViewmodel.apaarId),
+                  controller: apaarIdController,
                   decoration: vm.decoration('Apaar Id'),
                   onChanged: (value) => ref
                       .read(ApplicationViewmodel.apaarId.notifier)
@@ -198,7 +254,7 @@ class AcademicDetails extends ConsumerWidget {
                 SizedBox(height: 15),
                 Text('➡ EMIS No'),
                 TextFormField(
-                  initialValue: ref.watch(ApplicationViewmodel.emis),
+                  controller: emisController,
                   keyboardType: TextInputType.number,
                   decoration: vm.decoration('EMIS'),
                   onChanged: (value) => ref
@@ -208,7 +264,7 @@ class AcademicDetails extends ConsumerWidget {
                 SizedBox(height: 15),
                 Text('➡ New EMIS No'),
                 TextFormField(
-                  initialValue: ref.watch(ApplicationViewmodel.newEmis),
+                  controller: newEmisController,
                   decoration: vm.decoration('New EMIS'),
                   keyboardType: TextInputType.number,
                   onChanged: (value) => ref
@@ -218,7 +274,7 @@ class AcademicDetails extends ConsumerWidget {
                 SizedBox(height: 15),
                 Text('➡ TC Number'),
                 TextFormField(
-                  initialValue: ref.watch(ApplicationViewmodel.tcNo),
+                  controller: tcNoController,
                   decoration: vm.decoration('TC No'),
                   onChanged: (value) => ref
                       .read(ApplicationViewmodel.tcNo.notifier)
@@ -228,7 +284,7 @@ class AcademicDetails extends ConsumerWidget {
             ),
           ),
         SizedBox(height: 10),
-        if (!isApp)
+        if (!widget.isApp)
           Container(
             padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
@@ -311,11 +367,11 @@ class AcademicDetails extends ConsumerWidget {
                 ),
                 SizedBox(height: 15),
                 Text('➡ Who is working'),
-                DropdownButtonFormField<String>(
+                DropdownButtonFormField<int>(
                   decoration: vm.decoration('Choose..'),
-                  items: ['Father', 'Mother']
-                      .map((item) => DropdownMenuItem<String>(
-                          value: item, child: Text(item)))
+                  items: work
+                      .map((item) => DropdownMenuItem<int>(
+                          value: work.indexOf(item) + 1, child: Text(item)))
                       .toList(),
                   borderRadius: BorderRadius.circular(10),
                   value: ref.watch(ApplicationViewmodel.whoWork),

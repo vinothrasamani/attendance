@@ -3,7 +3,7 @@ import 'package:attendance/view_model/application_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class StudentIdentities extends ConsumerWidget {
+class StudentIdentities extends ConsumerStatefulWidget {
   const StudentIdentities({
     super.key,
     required this.isApp,
@@ -15,8 +15,35 @@ class StudentIdentities extends ConsumerWidget {
   final List<CredentialInfo> bldGrp;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StudentIdentities> createState() => _StudentIdentitiesState();
+}
+
+class _StudentIdentitiesState extends ConsumerState<StudentIdentities> {
+  late TextEditingController idm1Controller;
+  late TextEditingController idm2Controller;
+
+  @override
+  void initState() {
+    super.initState();
+    idm1Controller = TextEditingController();
+    idm2Controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    idm1Controller.dispose();
+    idm2Controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final vm = ApplicationViewmodel();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      idm1Controller.text = ref.watch(ApplicationViewmodel.idm1) ?? '';
+      idm2Controller.text = ref.watch(ApplicationViewmodel.idm2) ?? '';
+    });
     return Container(
       padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
@@ -26,17 +53,18 @@ class StudentIdentities extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          vm.title(isApp ? 'Physically Challenged' : 'Student Identities',
+          vm.title(
+              widget.isApp ? 'Physically Challenged' : 'Student Identities',
               Icons.badge),
-          if (!isApp) ...[
+          if (!widget.isApp) ...[
             SizedBox(height: 15),
             Text('➡ Blood Group'),
             DropdownButtonFormField<String>(
               decoration: vm.decoration('Blood Group'),
               validator: vm.validate,
-              items: bldGrp.isEmpty
+              items: widget.bldGrp.isEmpty
                   ? []
-                  : bldGrp
+                  : widget.bldGrp
                       .map((item) => DropdownMenuItem<String>(
                             value: item.oid,
                             child: Text(item.description),
@@ -50,7 +78,7 @@ class StudentIdentities extends ConsumerWidget {
             SizedBox(height: 15),
             Text('➡ Identification Mark 1'),
             TextFormField(
-              initialValue: ref.watch(ApplicationViewmodel.idm1),
+              controller: idm1Controller,
               decoration: vm.decoration('mark'),
               validator: vm.validate,
               onChanged: (value) =>
@@ -59,7 +87,7 @@ class StudentIdentities extends ConsumerWidget {
             SizedBox(height: 15),
             Text('➡ Identification Mark 2'),
             TextFormField(
-              initialValue: ref.watch(ApplicationViewmodel.idm2),
+              controller: idm2Controller,
               decoration: vm.decoration('mark'),
               onChanged: (value) =>
                   ref.read(ApplicationViewmodel.idm2.notifier).state = value,
@@ -70,9 +98,9 @@ class StudentIdentities extends ConsumerWidget {
           DropdownButtonFormField<String>(
             decoration: vm.decoration('Disability'),
             validator: vm.validate,
-            items: pcd.isEmpty
+            items: widget.pcd.isEmpty
                 ? []
-                : pcd
+                : widget.pcd
                     .map((item) => DropdownMenuItem<String>(
                           value: item.oid,
                           child: Text(item.description),

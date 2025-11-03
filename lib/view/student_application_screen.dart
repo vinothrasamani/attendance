@@ -76,7 +76,13 @@ class _StudentApplicationScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isApp ? 'Student Application' : 'Student Master'),
+        title: Text(
+          widget.isApp
+              ? 'Student Application'
+              : edit != null && edit.isNotEmpty
+                  ? "Edit Student Master"
+                  : 'Student Master',
+        ),
         actions: [
           if (!widget.isApp && student != null)
             if (edit == null || edit.isEmpty)
@@ -94,6 +100,7 @@ class _StudentApplicationScreenState
                         child: CircularProgressIndicator(strokeWidth: 2),
                       ),
               ),
+          SizedBox(width: 6)
         ],
       ),
       bottomNavigationBar: SafeArea(
@@ -145,34 +152,35 @@ class _StudentApplicationScreenState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (widget.isApp)
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              color: Colors.grey.withAlpha(40),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ApplicationViewmodel().title(
-                                    'Sibiling Information',
-                                    Icons.verified_user),
-                                const SizedBox(height: 10),
-                                info(
-                                    '🤵 Name : ',
-                                    student.firstName == null &&
-                                            student.lastName == null
-                                        ? 'No Name available!'
-                                        : '${student.firstName} ${student.lastName ?? ''}'),
-                                SizedBox(height: 10),
-                                info('✨ Application No : ',
-                                    student.applicationNo),
-                              ],
-                            ),
+                        Container(
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Colors.grey.withAlpha(40),
                           ),
-                        if (widget.isApp) Divider(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ApplicationViewmodel().title(
+                                  widget.isApp
+                                      ? 'Sibiling Information'
+                                      : 'Student Information',
+                                  Icons.verified_user),
+                              const SizedBox(height: 10),
+                              info(
+                                  '🤵 Name : ',
+                                  student.firstName == null &&
+                                          student.lastName == null
+                                      ? 'No Name available!'
+                                      : '${student.firstName} ${student.lastName ?? ''}'),
+                              SizedBox(height: 10),
+                              info(
+                                  '✨ Application No : ', student.applicationNo),
+                            ],
+                          ),
+                        ),
+                        Divider(),
                         const SizedBox(height: 10),
                         PersonalDetails(
                             isApp: widget.isApp,

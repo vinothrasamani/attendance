@@ -37,7 +37,7 @@ class ApplicationViewmodel {
   static final currAcaYear = StateProvider.autoDispose<String?>((ref) => null);
   static final secGrp = StateProvider.autoDispose<String?>((ref) => null);
   static final status = StateProvider.autoDispose<String?>((ref) => null);
-  static final whoWork = StateProvider.autoDispose<String?>((ref) => null);
+  static final whoWork = StateProvider.autoDispose<int?>((ref) => null);
   static final birthCert = StateProvider.autoDispose<bool>((ref) => false);
   static final transCert = StateProvider.autoDispose<bool>((ref) => false);
   static final dob =
@@ -159,6 +159,7 @@ class ApplicationViewmodel {
       final myDio = dio.Dio();
       final img = ref.read(imagePath.notifier).state;
       final oId = ref.read(student)!.oid;
+      final editOid = ref.read(oIdForEdit);
       final data = isApp
           ? {
               'oId': oId,
@@ -179,6 +180,7 @@ class ApplicationViewmodel {
                 ),
             }
           : {
+              if (editOid != null) 'editOid': editOid,
               'oId': oId,
               'adminNo': ref.read(adminNo),
               'adminDate':
@@ -209,17 +211,24 @@ class ApplicationViewmodel {
                 'image': await dio.MultipartFile.fromFile(img,
                     filename: img.split('/').last),
             };
-      print(data);
       dio.FormData formData = dio.FormData.fromMap(data);
+      final path =
+          '${BaseFile.baseApiNetUrl}/${isApp ? 'store-application' : 'store-master'}';
       final res = await myDio.post(
-          '${BaseFile.baseApiNetUrl}/${isApp ? 'store-application' : 'store-master'}',
-          data: formData,
-          options: dio.Options(headers: {
+        path,
+        data: formData,
+        options: dio.Options(
+          headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }));
-      print('res => $res');
-      if (res.statusCode == 200) {
+            'Accept': 'application/json',
+          },
+        ),
+      );
+      final success = res.data['success'] == true ||
+          res.data['success'].toString() == 'true';
+      if (success) {
+        ref.read(isLoading.notifier).state = false;
+        Get.back();
         Get.snackbar(
           'Success!',
           isApp
@@ -229,9 +238,9 @@ class ApplicationViewmodel {
           backgroundColor: const Color.fromARGB(255, 0, 124, 4),
           colorText: Colors.white,
         );
+      } else {
+        ref.read(isLoading.notifier).state = false;
       }
-      ref.read(isLoading.notifier).state = false;
-      Get.back();
     } catch (e) {
       debugPrint('Error on => $e');
       ref.read(isLoading.notifier).state = false;
@@ -275,6 +284,7 @@ class ApplicationViewmodel {
       final data = studentMasterModelFromJson(res);
       if (data.success) {
         final info = data.data!;
+        await info.loadPhoto();
         ref.read(adminNo.notifier).state = info.admissionNo;
         ref.read(adminDate.notifier).state = info.admnDate;
         ref.read(emis.notifier).state = info.emis;
@@ -293,13 +303,15 @@ class ApplicationViewmodel {
         ref.read(tcNo.notifier).state = info.tcNo;
         ref.read(academicYear.notifier).state = info.academicYearJoined;
         ref.read(branch.notifier).state = info.branch;
-        ref.read(classIs.notifier).state = info.className;
+        ref.read(classIs.notifier).state = info.classJoined;
         ref.read(sectionIs.notifier).state = info.sectionJoined;
         ref.read(bgrp.notifier).state = info.bloodGroup;
         ref.read(idm1.notifier).state = info.indentificationMark1;
         ref.read(idm2.notifier).state = info.indentificationMark2;
         ref.read(pds.notifier).state = info.physicalDisability;
+        ref.read(imagePath.notifier).state = info.photo;
         ref.read(oIdForEdit.notifier).state = info.oid;
+        await Future.delayed(Duration(milliseconds: 100));
       } else {
         ref.read(oIdForEdit.notifier).state = null;
         Get.snackbar(
@@ -311,6 +323,7 @@ class ApplicationViewmodel {
         );
       }
     } catch (e) {
+      print(e);
       ref.read(oIdForEdit.notifier).state = null;
     }
   }
