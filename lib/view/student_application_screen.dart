@@ -83,6 +83,12 @@ class _StudentApplicationScreenState
                   ? "Edit Student Master"
                   : 'Student Master',
         ),
+        bottom: student == null
+            ? PreferredSize(
+                preferredSize: Size.fromHeight(0.5),
+                child: Container(height: 0.5, color: Colors.grey),
+              )
+            : null,
         actions: [
           if (!widget.isApp && student != null)
             if (edit == null || edit.isEmpty)
