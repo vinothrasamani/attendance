@@ -323,7 +323,6 @@ class ApplicationViewmodel {
         );
       }
     } catch (e) {
-      print(e);
       ref.read(oIdForEdit.notifier).state = null;
     }
   }
